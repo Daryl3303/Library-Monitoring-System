@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Sidebar from "./adminComponents/sidebar";
 import Navbar from "./adminComponents/navbar";
 import Dashboard from "./adminComponents/dashboard";
@@ -8,6 +8,7 @@ import ReservationReport from "./adminComponents/reservationReport";
 import BookReport from "./adminComponents/bookReport";
 import ManageReservation from "./adminComponents/manageBook";
 import ManageUser from "./adminComponents/manageUser";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 interface LogoutModalProps {
@@ -21,11 +22,38 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Close modal on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        event.target instanceof Node &&
+        !modalRef.current.contains(event.target)
+      ) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
+  
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 70 }}>
+      <div ref={modalRef} className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6">
           <div className="flex items-center justify-center mb-4 text-yellow-500">
             <svg
@@ -71,8 +99,10 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 const Admin: React.FC = () => {
   const [pageState, setPageState] = useState<string>("/dashboard");
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
     const { setUserId } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogoutClick = (): void => {
     setLogoutModalOpen(true);
@@ -82,14 +112,27 @@ const Admin: React.FC = () => {
     const handleLogoutConfirm = (): void => {
     setUserId(null);
     setLogoutModalOpen(false);
+    navigate("/signIn");
   };
 
+  const handlePageChange = (path: string): void => {
+  if (path === "/logout") {
+    setLogoutModalOpen(true);
+  } else {
+    setIsTransitioning(true);
+
+    setTimeout(() => {
+    setPageState(path);
+    setIsTransitioning(false);
+    }, 200);
+  }
+};
     
   return (
     <div className="flex flex-col min-h-screen">
       <div className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow" style={{ zIndex: 60 }}>
         <Navbar 
-        onChangeState={(path) => {
+        onChangeState={(path) => {  
             if (path === "/logout") {
               setLogoutModalOpen(true);
             } else {
@@ -99,18 +142,59 @@ const Admin: React.FC = () => {
           onLogoutClick={handleLogoutClick}/>
       </div>
       <div className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300" style={{ zIndex: 50 }}>
-        <Sidebar
+        <Sidebar  
+        currentPage={pageState}
+        onPageChange={handlePageChange}
         />
       </div>
 
-      <main className="flex-1 transition-all duration-300" >
-        {pageState === "/dashboard" && <Dashboard />}
-        {pageState === "/resevation" && <Reservation />}
-        {pageState === "/bookStatus" && <BookStatus />}
-        {pageState === "/reservationReport" && <ReservationReport />}
-        {pageState === "/bookReport" && <BookReport />}
-        {pageState === "/manageReservation" && <ManageReservation />}
-        {pageState === "/manageUser" && <ManageUser />}
+     <main 
+        className="flex-1 transition-all duration-300 ml-64 pt-[60px] min-h-screen bg-gray-50" 
+        style={{ zIndex: 40 }}
+      >
+        <div 
+          className={`p-6 transition-all duration-300 ease-in-out transform ${
+            isTransitioning 
+              ? 'opacity-0 translate-y-2 scale-95' 
+              : 'opacity-100 translate-y-0 scale-100'
+          }`}
+        >
+          {pageState === "/dashboard" && (
+            <div className="animate-fade-in">
+              <Dashboard />
+            </div>
+          )}
+          {pageState === "/resevation" && (
+            <div className="animate-fade-in">
+              <Reservation />
+            </div>
+          )}
+          {pageState === "/bookStatus" && (
+            <div className="animate-fade-in">
+              <BookStatus />
+            </div>
+          )}
+          {pageState === "/reservationReport" && (
+            <div className="animate-fade-in">
+              <ReservationReport />
+            </div>
+          )}
+          {pageState === "/bookReport" && (
+            <div className="animate-fade-in">
+              <BookReport />
+            </div>
+          )}
+          {pageState === "/manageReservation" && (
+            <div className="animate-fade-in">
+              <ManageReservation />
+            </div>
+          )}
+          {pageState === "/manageUser" && (
+            <div className="animate-fade-in">
+              <ManageUser />
+            </div>
+          )}
+        </div>
       </main>
 
       <LogoutModal

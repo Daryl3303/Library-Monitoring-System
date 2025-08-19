@@ -12,18 +12,19 @@ import {
   Wrench
 } from 'lucide-react';
 
-const Sidebar = () => {
+interface SidebarProps {
+  currentPage: string;
+  onPageChange: (path: string) => void;
+}
+
+type Section = 'reports' | 'maintenance';
+
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
   
   const [expandedSections, setExpandedSections] = useState<Record<Section, boolean>>({
     reports: false,
     maintenance: false
   });
-  
-  const [activeItem, setActiveItem] = useState('dashboard');
-  type Section = 'reports' | 'maintenance';
-
-
-  
 
   const toggleSection = (section: Section) => {
     setExpandedSections(prev => ({
@@ -32,11 +33,12 @@ const Sidebar = () => {
     }));
   };
 
-  const handleItemClick = (itemId: string) => {
-    setActiveItem(itemId);  
+  const handleItemClick = (path: string) => {
+    onPageChange(path);
   };
 
-
+  // Helper function to check if current item is active
+  const isActive = (path: string) => currentPage === path;
 
   return (
     <div className="w-64 h-screen overflow-y-auto bg-gradient-to-b from-blue-600 to-blue-700 text-white flex flex-col">
@@ -51,9 +53,9 @@ const Sidebar = () => {
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-              activeItem === 'dashboard' ? 'bg-white/20' : 'hover:bg-white/10'
+              isActive('/dashboard') ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
-            onClick={() =>  handleItemClick('dashboard')}
+            onClick={() => handleItemClick('/dashboard')}
           >
             <LayoutDashboard className="w-6 h-6" />
             <span className="font-medium text-lg">Dashboard</span>
@@ -63,18 +65,18 @@ const Sidebar = () => {
           <div className="ml-8 mt-2 space-y-1">
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                activeItem === 'reservations' ? 'bg-white/20' : 'hover:bg-white/10'
+                isActive('/resevation') ? 'bg-white/20' : 'hover:bg-white/10'
               }`}
-              onClick={() => handleItemClick('reservations')}
+              onClick={() => handleItemClick('/resevation')}
             >
               <Calendar className="w-5 h-5" />
               <span>Reservations</span>
             </div>
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                activeItem === 'book-status' ? 'bg-white/20' : 'hover:bg-white/10'
+                isActive('/bookStatus') ? 'bg-white/20' : 'hover:bg-white/10'
               }`}
-              onClick={() => handleItemClick('book-status')}
+              onClick={() => handleItemClick('/bookStatus')}
             >
               <CheckCircle className="w-5 h-5" />
               <span>Book Status</span>
@@ -86,12 +88,9 @@ const Sidebar = () => {
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-              activeItem === 'reports' ? 'bg-white/20' : 'hover:bg-white/10'
+              (isActive('/reservationReport') || isActive('/bookReport')) ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
-            onClick={() => {
-              toggleSection('reports');
-              handleItemClick('reports');
-            }}
+            onClick={() => toggleSection('reports')}
           >
             <FileText className="w-6 h-6" />
             <span className="font-medium flex-1 text-lg">Reports</span>
@@ -106,27 +105,27 @@ const Sidebar = () => {
             <div className="ml-8 mt-2 space-y-1">
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  activeItem === 'reservation-reports' ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/reservationReport') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('reservation-reports')}
+                onClick={() => handleItemClick('/reservationReport')}
               >
                 <Calendar className="w-5 h-5" />
                 <span>Reservation Reports</span>
               </div>
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  activeItem === 'library-users-reports' ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/libraryUsersReport') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('library-users-reports')}
+                onClick={() => handleItemClick('/libraryUsersReport')}
               >
                 <Users className="w-5 h-5" />
                 <span>Library Users Reports</span>
               </div>
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  activeItem === 'book-reports' ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/bookReport') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('book-reports')}
+                onClick={() => handleItemClick('/bookReport')}
               >
                 <Book className="w-5 h-5" />
                 <span>Book Reports</span>
@@ -139,12 +138,9 @@ const Sidebar = () => {
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-              activeItem === 'maintenance' ? 'bg-white/20' : 'hover:bg-white/10'
+              (isActive('/manageReservation') || isActive('/manageUser')) ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
-            onClick={() => {
-              toggleSection('maintenance');
-              handleItemClick('maintenance');
-            }}
+            onClick={() => toggleSection('maintenance')}
           >
             <Wrench className="w-6 h-6" />
             <span className="font-medium flex-1 text-lg">Maintenance</span>
@@ -159,18 +155,18 @@ const Sidebar = () => {
             <div className="ml-8 mt-2 space-y-1">
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  activeItem === 'manage-reservations' ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/manageReservation') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('manage-reservations')}
+                onClick={() => handleItemClick('/manageReservation')}
               >
                 <Calendar className="w-5 h-5" />
                 <span>Manage Reservations</span>
               </div>
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  activeItem === 'manage-library-users' ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/manageUser') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('manage-library-users')}
+                onClick={() => handleItemClick('/manageUser')}
               >
                 <UserCheck className="w-5 h-5" />
                 <span>Manage Library Users</span>

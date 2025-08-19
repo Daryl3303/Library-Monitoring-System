@@ -1,5 +1,5 @@
 // Fixed Navbar.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { ChevronDown, User, BookOpen } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
@@ -32,22 +32,6 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        event.target instanceof Node &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleDropdownToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
@@ -76,8 +60,8 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
             <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl p-2 hover:bg-white/25 transition-all duration-300 hover:scale-105">
               <BookOpen className="w-6 h-6 text-white drop-shadow-sm" />
             </div>
-            <h1 className="text-white text-lg font-semibold tracking-tight drop-shadow-sm">
-              Smart Library System
+            <h1 className="text-white text- font-semibold tracking-tight drop-shadow-sm">
+              Smart Library: Online Book Reservation and Monitoring System
             </h1>
           </div>
 
@@ -112,7 +96,7 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
         <div
           className="fixed top-[65px] right-6 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 transform transition-all duration-200 ease-out"
           style={{
-            zIndex: 9999,
+            zIndex: 60,
             position: "fixed",
           }}
         >
