@@ -1,11 +1,20 @@
 // LibraryUserTable.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import UserFormModal from "../modals/AddUser";
 import DeleteConfirmationModal from "../modals/Delete";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 interface User {
-  id: number;
+  id?: string;
   name: string;
   email: string;
   number: string;
@@ -23,69 +32,21 @@ interface FormData {
   role: "Student" | "Teacher" | "Admin";
 }
 
-const initialUsers: User[] = [
-  {
-    id: 1,
-    name: "Maria Santos",
-    email: "maria.santos@lcc-isabela.edu.ph",
-    number: "09123456789",
-    department: "Computer Science",
-    year: "2024",
-    role: "Student",
-  },
-  {
-    id: 2,
-    name: "Dr. Juan Cruz",
-    email: "juan.cruz@lcc-isabela.edu.ph",
-    number: "09987654321",
-    department: "Engineering",
-    year: "2020",
-    role: "Teacher",
-  },
-  {
-    id: 3,
-    name: "Ana Rodriguez",
-    email: "ana.rodriguez@lcc-isabela.edu.ph",
-    number: "09456123789",
-    department: "Business",
-    year: "2023",
-    role: "Student",
-  },
-  {
-    id: 4,
-    name: "Admin User",
-    email: "admin@lcc-isabela.edu.ph",
-    number: "09111222333",
-    department: "Administration",
-    year: "2019",
-    role: "Admin",
-  },
-  {
-    id: 5,
-    name: "Prof. Carlos Mendoza",
-    email: "carlos.mendoza@lcc-isabela.edu.ph",
-    number: "09777888999",
-    department: "Computer Science",
-    year: "2018",
-    role: "Teacher",
-  },
-];
+
 
 const departments = [
   "All Departments",
-  "Computer Science",
-  "Engineering",
-  "Business",
-  "Administration",
-  "Education",
-  "Liberal Arts",
+  "Bachelor of Science in Information Technology",
+  "Bachelor of Science in Business Administration ",
+  "Bachelor of Science in Hospital Management",
+  "Bachelor of Science in Elementary Education ",
+  "Bachelor of Science in Secondary Education",
 ];
 
 export default function LibraryUserTable() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -110,35 +71,72 @@ export default function LibraryUserTable() {
     return matchesSearch && matchesDepartment;
   });
 
-  const handleAddUser = () => {
-    const newUser: User = {
-      id: Math.max(...users.map((u) => u.id)) + 1,
-      ...formData,
-    };
-    setUsers([...users, newUser]);
+  const fetchUsers = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const usersData: User[] = querySnapshot.docs.map((document) => ({
+      id: document.id,
+      ...(document.data() as User),
+    }));
+    setUsers(usersData);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+};
+
+useEffect(() => {
+  fetchUsers();
+}, []);
+
+  const handleAddUser = async () => {
+    try{
+    const docRef = await addDoc(collection(db, "users"), formData);
+    setUsers([...users, { id: docRef.id, ...formData }]);
     setShowAddModal(false);
     resetForm();
+  } catch (error) {
+    console.error("Error adding user:", error);
+  }
   };
 
-  const handleEditUser = () => {
-    if (selectedUser) {
+const handleEditUser = async () => {
+  if (selectedUser) {
+    try {
+      // Update local state
       setUsers(
         users.map((user) =>
           user.id === selectedUser.id ? { ...selectedUser, ...formData } : user
         )
       );
+
+      const userRef = doc(db, "users", selectedUser.id as string);
+      await updateDoc(userRef, { ...formData });
+
       setShowEditModal(false);
       resetForm();
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
-  };
+  }
+};
 
-  const handleDeleteUser = () => {
-    if (selectedUser) {
+ const handleDeleteUser = async () => {
+  if (selectedUser) {
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, "users", selectedUser.id as string));
+
+      // Optionally update state (not needed if you use onSnapshot)
       setUsers(users.filter((user) => user.id !== selectedUser.id));
+
+      // Reset UI states
       setShowDeleteModal(false);
       setSelectedUser(null);
+    } catch (error) {
+      console.error("Error deleting user:", error);
     }
-  };
+  }
+};
 
   const resetForm = () => {
     setFormData({
@@ -287,13 +285,13 @@ export default function LibraryUserTable() {
                       onClick={() => openEditModal(user)}
                       className="text-blue-600 hover:text-blue-800 transition-colors hover:scale-110 duration-200"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-6 h-6" />
                     </button>
                     <button
                       onClick={() => openDeleteModal(user)}
                       className="text-red-600 hover:text-red-800 transition-colors hover:scale-110 duration-200"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-6 h-6" />
                     </button>
                   </div>
                 </td>
@@ -330,12 +328,14 @@ export default function LibraryUserTable() {
     onClose={closeModals}
   />
 
+{selectedUser && (
   <DeleteConfirmationModal
     isOpen={showDeleteModal}
     user={selectedUser}
     onConfirm={handleDeleteUser}
     onCancel={closeModals}
   />
+)}
 </div>
 
   );
