@@ -5,12 +5,14 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../firebase/firebase";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { FcGoogle } from "react-icons/fc";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { setUserId } = useAuth();
 
   const [authing, setAuthing] = useState(false);
   const [email, setEmail] = useState("");
@@ -28,6 +30,7 @@ const SignIn = () => {
     signInWithPopup(auth, new GoogleAuthProvider())
       .then((response) => {
         console.log(response.user.uid);
+        setUserId(response.user.uid);
         navigate("/admin");
       })
       .catch((error) => {
@@ -43,6 +46,7 @@ const SignIn = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((response) => {
         console.log(response.user.uid);
+        setUserId(response.user.uid);
         navigate("/admin");
       })
       .catch((error) => {
@@ -77,7 +81,7 @@ const SignIn = () => {
               onClick={() => navigate("/signup")}
               className="px-6 lg:px-8 py-2.5 lg:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-inter tracking-wide text-sm lg:text-base"
             >
-              Sign Up
+              Register
             </button>
           </div>
         </div>
@@ -89,7 +93,7 @@ const SignIn = () => {
           <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
             <img src={logo} alt="Logo" className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-3 sm:mb-4" />
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4 text-blue-600 font-poppins tracking-wide text-center">
-              Sign In
+              Log In
             </h2>
           </div>
           
@@ -174,7 +178,7 @@ const SignIn = () => {
                 onClick={() => navigate("/signup")}
                 className="text-blue-600 font-semibold hover:underline"
               >
-                Sign Up
+                Register
               </button>
             </p>
           </div>

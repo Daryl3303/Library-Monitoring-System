@@ -1,16 +1,18 @@
 import { X } from "lucide-react";
 
 interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  number: string;
+  coverPage: string;
+  title: string;
+  author: string;
+  overview: string;
+  publisher: string;
+  date: string;
+  isbn: string;
   department: string;
-  year: string;
-  role: "Student" | "Teacher" | "Admin";
+  quantity: number;
 }
 
-interface UserFormModalProps {
+interface AddBookModalProps {
   isOpen: boolean;
   isEdit: boolean;
   formData: FormData;
@@ -27,25 +29,23 @@ const departments = [
   "Bachelor of Science in Secondary Education",
 ];
 
-const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
-
-function UserFormModal({
+function AddBookModal({
   isOpen,
   isEdit,
   formData,
   setFormData,
   onSubmit,
   onClose,
-}: UserFormModalProps) {
+}: AddBookModalProps) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-blue-200">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-blue-200">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-blue-300 bg-blue-50 rounded-t-2xl">
           <h3 className="text-xl font-bold text-blue-800">
-            {isEdit ? "Edit User" : "Add New User"}
+            {isEdit ? "Edit Book" : "Add New Book"}
           </h3>
           <button
             onClick={onClose}
@@ -57,88 +57,112 @@ function UserFormModal({
 
         {/* Form */}
         <form
-          className="p-6"
+          className="p-6 pb-4"
           onSubmit={(e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             onSubmit();
           }}
         >
-          <div className="space-y-5">
-            {/* Name */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            {/* Left Column */}
+
+            {/* Cover Page */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Name
+                Cover Page
               </label>
               <input
                 type="text"
-                value={formData.name}
+                value={formData.coverPage}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, coverPage: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter full name"
+                placeholder="Enter cover page URL or description"
                 required
               />
             </div>
 
-            {/* Email - Different behavior for edit vs add */}
+            {/* Title */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Email
-              </label>
-              {isEdit ? (
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
-                  {formData.email}
-                </div>
-              ) : (
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter email address"
-                  required
-                />
-              )}
-            </div>
-
-            {/* Password - Different behavior for edit vs add */}
-            <div>
-              <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Password
-                {isEdit && (
-                  <span className="text-xs text-gray-500 ml-1">
-                    (Leave blank to keep current password)
-                  </span>
-                )}
+                Title
               </label>
               <input
-                type="password"
-                value={formData.password}
+                type="text"
+                value={formData.title}
                 onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
+                  setFormData({ ...formData, title: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder={isEdit ? "Enter new password (optional)" : "Enter password"}
-                required={!isEdit}
+                placeholder="Book's Title"
+                required
               />
             </div>
 
-            {/* Phone Number */}
+            {/* Author */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Phone Number
+                Author
               </label>
               <input
-                type="tel"
-                value={formData.number}
+                type="text"
+                value={formData.author}
                 onChange={(e) =>
-                  setFormData({ ...formData, number: e.target.value })
+                  setFormData({ ...formData, author: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter phone number"
+                placeholder="Author's Name"
+                required
+              />
+            </div>
+
+            {/* Publisher */}
+            <div>
+              <label className="block text-sm font-semibold text-blue-700 mb-1">
+                Publisher
+              </label>
+              <input
+                type="text"
+                value={formData.publisher}
+                onChange={(e) =>
+                  setFormData({ ...formData, publisher: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Publisher's Name"
+                required
+              />
+            </div>
+
+            {/* Year Published */}
+            <div>
+              <label className="block text-sm font-semibold text-blue-700 mb-1">
+                Year Published
+              </label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* ISBN */}
+            <div>
+              <label className="block text-sm font-semibold text-blue-700 mb-1">
+                ISBN
+              </label>
+              <input
+                type="text"
+                value={formData.isbn}
+                onChange={(e) =>
+                  setFormData({ ...formData, isbn: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="ISBN Number"
                 required
               />
             </div>
@@ -167,68 +191,58 @@ function UserFormModal({
               </select>
             </div>
 
-            {/* Role */}
+            {/* Quantity */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Role
+                Quantity
               </label>
-              <select
-                value={formData.role}
-                onChange={(e) =>{
-                  const newRole = e.target.value as "Student" | "Teacher" | "Admin";
+              <input
+                type="number"
+                value={formData.quantity === 0 ? "" : formData.quantity}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
-                    role: newRole,
-                    year: newRole === "Student" ? "1st Year" : "N/A",
+                    quantity:
+                      e.target.value === "" ? 0 : Number(e.target.value),
                   })
-                }}
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Student">Student</option>
-                <option value="Teacher">Teacher</option>
-                <option value="Admin">Admin</option>
-              </select>
-            </div>
-                
-            {/* Year */}
-            {formData.role === "Student" && (
-            <div>
-              <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Year Level
-              </label>
-              <select
-                value={formData.year}
-                onChange={(e) =>
-                  setFormData({ ...formData, year: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option disabled value="">
-                  Select Year
-                </option>
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
+                placeholder="Quantity of Books"
+                min="1"
+                required
+              />
             </div>
-             )}
+
+            {/* Overview - Full Width */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-blue-700 mb-1">
+                Overview
+              </label>
+              <textarea
+                value={formData.overview}
+                onChange={(e) =>
+                  setFormData({ ...formData, overview: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Book's Overview"
+                required
+                rows={4}
+              />
+            </div>
           </div>
-           
 
           {/* Buttons */}
-          <div className="flex gap-3 mt-8">
+          <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg shadow-md transition"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg shadow-md transition-colors duration-200"
             >
-              {isEdit ? "Update User" : "Add User"}
+              {isEdit ? "Update Book" : "Add Book"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg transition"
+              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg transition-colors duration-200"
             >
               Cancel
             </button>
@@ -239,4 +253,4 @@ function UserFormModal({
   );
 }
 
-export default UserFormModal;
+export default AddBookModal;
