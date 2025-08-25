@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Calendar,
   CheckCircle,
-  Users,
   Book,
   UserCheck,
   Wrench
@@ -53,9 +52,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-              isActive('/dashboard') ? 'bg-white/20' : 'hover:bg-white/10'
+              isActive('/') ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
-            onClick={() => handleItemClick('/dashboard')}
+            onClick={() => handleItemClick('/')}
           >
             <LayoutDashboard className="w-6 h-6" />
             <span className="font-medium text-lg">Dashboard</span>
@@ -65,9 +64,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
           <div className="ml-8 mt-2 space-y-1">
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                isActive('/resevation') ? 'bg-white/20' : 'hover:bg-white/10'
+                isActive('/reservation') ? 'bg-white/20' : 'hover:bg-white/10'
               }`}
-              onClick={() => handleItemClick('/resevation')}
+              onClick={() => handleItemClick('/reservation')}
             >
               <Calendar className="w-5 h-5" />
               <span>Reservations</span>
@@ -111,15 +110,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
               >
                 <Calendar className="w-5 h-5" />
                 <span>Reservation Reports</span>
-              </div>
-              <div 
-                className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  isActive('/libraryUsersReport') ? 'bg-white/20' : 'hover:bg-white/10'
-                }`}
-                onClick={() => handleItemClick('/libraryUsersReport')}
-              >
-                <Users className="w-5 h-5" />
-                <span>Library Users Reports</span>
               </div>
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${

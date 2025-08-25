@@ -5,12 +5,11 @@ import Dashboard from "./adminComponents/dashboard";
 import Reservation from "./adminComponents/reservation";
 import BookStatus from "./adminComponents/bookStatus";
 import ReservationReport from "./adminComponents/reservationReport";
-import BookReport from "./adminComponents/bookReport";
-import ManageReservation from "./adminComponents/manageBook";
+import BookReports from "./adminComponents/bookReport";
+import ManageReservation from "./adminComponents/manageReservation";
 import ManageUser from "./adminComponents/manageUser";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -50,11 +49,15 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 
   if (!isOpen) return null;
 
-  
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 70 }}>
-      <div ref={modalRef} className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      style={{ zIndex: 70 }}
+    >
+      <div
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl max-w-md w-full"
+      >
         <div className="p-6">
           <div className="flex items-center justify-center mb-4 text-yellow-500">
             <svg
@@ -98,74 +101,111 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
   );
 };
 const Admin: React.FC = () => {
-  const [pageState, setPageState] = useState<string>("/dashboard");
+  const [pageState, setPageState] = useState<string>("/");
+   const location = useLocation();
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
-    const { setUserId } = useAuth();
-    const navigate = useNavigate();
+   useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Map URL paths to internal page states
+    const pathMapping: { [key: string]: string } = {
+      '/admin': '/',
+      '/admin/dashboard': '/',
+      '/admin/reservation': '/reservation',
+      '/admin/book-status': '/bookStatus',
+      '/admin/reservation-report': '/reservationReport',
+      '/admin/book-report': '/bookReport',
+      '/admin/manage-reservation': '/manageReservation',
+      '/admin/manage-user': '/manageUser',
+    };
 
-    const handleLogoutClick = (): void => {
+    // Set the page state based on current URL
+    const mappedPath = pathMapping[currentPath] || '/';
+    setPageState(mappedPath);
+  }, [location.pathname]);
+
+  const { setUserId } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogoutClick = (): void => {
     setLogoutModalOpen(true);
   };
 
-  
-    const handleLogoutConfirm = (): void => {
+  const handleLogoutConfirm = (): void => {
     setUserId(null);
     setLogoutModalOpen(false);
     navigate("/signIn");
   };
 
   const handlePageChange = (path: string): void => {
-  if (path === "/logout") {
-    setLogoutModalOpen(true);
-  } else {
-    setIsTransitioning(true);
+    if (path === "/logout") {
+      setLogoutModalOpen(true);
+    } else {
+      setIsTransitioning(true);
 
-    setTimeout(() => {
-    setPageState(path);
-    setIsTransitioning(false);
-    }, 200);
-  }
-};
-    
+      const urlMapping: { [key: string]: string } = {
+        '/': '/admin/dashboard',
+        '/reservation': '/admin/reservation',
+        '/bookStatus': '/admin/book-status',
+        '/reservationReport': '/admin/reservation-report',
+        '/bookReport': '/admin/book-report',
+        '/manageReservation': '/admin/manage-reservation',
+        '/manageUser': '/admin/manage-user',
+      };
+
+      const urlPath = urlMapping[path] || '/admin/dashboard';
+
+      setTimeout(() => {
+        setPageState(path);
+        navigate(urlPath, { replace: true });
+        setIsTransitioning(false);
+      }, 200);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow" style={{ zIndex: 60 }}>
-        <Navbar 
-        onChangeState={(path) => {  
+      <div
+        className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow"
+        style={{ zIndex: 60 }}
+      >
+        <Navbar
+          onChangeState={(path) => {
             if (path === "/logout") {
               setLogoutModalOpen(true);
             } else {
-              setPageState(path);
+              handlePageChange(path);
             }
           }}
-          onLogoutClick={handleLogoutClick}/>
-      </div>
-      <div className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300" style={{ zIndex: 50 }}>
-        <Sidebar  
-        currentPage={pageState}
-        onPageChange={handlePageChange}
+          onLogoutClick={handleLogoutClick}
         />
       </div>
+      <div
+        className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300"
+        style={{ zIndex: 50 }}
+      >
+        <Sidebar currentPage={pageState} onPageChange={handlePageChange} />
+      </div>
 
-     <main 
-        className="flex-1 transition-all duration-300 ml-64 pt-[60px] min-h-screen bg-gray-50" 
+      <main
+        className="flex-1 transition-all duration-300 ml-64 pt-[60px] min-h-screen bg-gray-50"
         style={{ zIndex: 40 }}
       >
-        <div 
+        <div
           className={`p-6 transition-all duration-300 ease-in-out transform ${
-            isTransitioning 
-              ? 'opacity-0 translate-y-2 scale-95' 
-              : 'opacity-100 translate-y-0 scale-100'
+            isTransitioning
+              ? "opacity-0 translate-y-2 scale-95"
+              : "opacity-100 translate-y-0 scale-100"
           }`}
         >
-          {pageState === "/dashboard" && (
+          {pageState === "/" && (
             <div className="animate-fade-in">
               <Dashboard />
             </div>
           )}
-          {pageState === "/resevation" && (
+          {pageState === "/reservation" && (
             <div className="animate-fade-in">
               <Reservation />
             </div>
@@ -182,7 +222,7 @@ const Admin: React.FC = () => {
           )}
           {pageState === "/bookReport" && (
             <div className="animate-fade-in">
-              <BookReport />
+              <BookReports />
             </div>
           )}
           {pageState === "/manageReservation" && (

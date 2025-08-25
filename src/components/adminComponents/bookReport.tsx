@@ -1,10 +1,10 @@
 
-const BookStatus = () => {
+const BookReports = () => {
     return (
         <div>
-            <h1>Book Status</h1>
+            <h1>Book Reports</h1>
         </div>
     )
 }
 
-export default BookStatus;
+export default BookReports;

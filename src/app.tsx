@@ -1,6 +1,7 @@
 import SignIn from './components/SignIn.tsx'
 import SignUp from './components/SignUp.tsx'
 import Admin from './components/Admin.tsx'
+import ProtectedRoute from './context/protectedRoute.tsx'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 
 const App = () => {
@@ -9,7 +10,11 @@ const App = () => {
             <Routes>
                 <Route path="/signIn" element={<SignIn />} />
                 <Route path="/signUp" element={<SignUp />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/*" element={
+                    <ProtectedRoute>
+                    <Admin />
+                    </ProtectedRoute>} />
+                 <Route path="/" element={<Navigate to="/signIn" />} />
                 <Route path="*" element={<Navigate to="/signIn" />} />
             </Routes>
         </Router>
