@@ -4,11 +4,11 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { Eye, EyeOff } from "lucide-react";
 
 const departments = [
   "Bachelor of Science in Information Technology",
@@ -23,7 +23,6 @@ const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SignUp = () => {
   const auth = getAuth();
   const navigate = useNavigate();
-  const { setUserId } = useAuth();
 
   const [authing, setAuthing] = useState(false);
   const [name, setName] = useState("");
@@ -33,6 +32,7 @@ const SignUp = () => {
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [role, setRole] = useState("Student");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -50,8 +50,9 @@ const SignUp = () => {
         email,
         password
       );
+
       await updateProfile(response.user, { displayName: name });
-      await addDoc(collection(db, "users"), {
+      await setDoc(doc(db, "users", response.user.uid), {
         uid: response.user.uid,
         name,
         email,
@@ -59,11 +60,11 @@ const SignUp = () => {
         department,
         year: role === "Student" ? year : "",
         role,
+        createdAt: new Date(),
       });
 
-      setUserId(response.user.uid);
-
-      navigate("/admin");
+      // ✅ No need setUserId(), context handles it automatically
+      navigate("/");
     } catch (err: any) {
       console.error("Signup error:", err.message);
       setError(err.message);
@@ -140,7 +141,10 @@ const SignUp = () => {
             <input
               type="text"
               placeholder="Full Name"
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
+              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -149,36 +153,63 @@ const SignUp = () => {
             <input
               type="email"
               placeholder="Email Address"
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
+              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-100 rounded-r-2xl transition-colors"
+              >
+                {showPassword ? (
+                  <Eye className="h-6 w-6 text-gray-400" />
+                ) : (
+                  <EyeOff className="h-6 w-6 text-gray-400" />
+                )}
+              </button>
+            </div>
 
             <input
-              type="text"
+              type="tel"
               placeholder="Phone Number"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
+              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
             />
 
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
+              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
               required
             >
-              <option disabled value="">Select Department</option>
+              <option disabled value="">
+                Select Department
+              </option>
               {departments.map((dept, index) => (
                 <option key={index} value={dept}>
                   {dept}
@@ -189,24 +220,33 @@ const SignUp = () => {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
+              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
             >
               <option value="Student">Student</option>
               <option value="Teacher">Teacher</option>
             </select>
 
             {role === "Student" && (
-              <select 
-              value={years}
-              onChange={(e) => setYear(e.target.value)}
-              className="border-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 font-inter placeholder-gray-400 hover:border-blue-300 text-sm sm:text-base"
-              required>
-                <option disabled value="">Select Year</option>
-              {years.map((dept, index) => (
-                <option key={index} value={dept}>
-                  {dept}
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                                 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
+                                 border-gray-200 hover:border-gray-300 bg-white
+                                font-inter placeholder-gray-400 focus:outline-none"
+                required
+              >
+                <option disabled value="">
+                  Select Year
                 </option>
-              ))}
+                {years.map((yearOption, index) => (
+                  <option key={index} value={yearOption}>
+                    {yearOption}
+                  </option>
+                ))}
               </select>
             )}
 

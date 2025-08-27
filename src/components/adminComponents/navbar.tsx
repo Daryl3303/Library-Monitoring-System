@@ -1,16 +1,19 @@
 // Fixed Navbar.tsx
-import React, { useState, useRef } from "react";
-import { ChevronDown, User, BookOpen } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, User } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
+
+import { auth, db } from "../../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface dropdownProps {
   onLogoutClick: () => void;
   onChangeState: (path: string) => void;
 }
 
-interface dropdownMenu{
+interface dropdownMenu {
   icon: JSX.Element;
   label: string;
   path: string;
@@ -20,18 +23,20 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
   const dropdownMenus: dropdownMenu[] = [
     {
       icon: <FaUserCog size={24} />,
-      label: "User Profile",
+      label: "Profile",
       path: "/userProfile",
     },
     {
       icon: <LuLogOut size={24} />,
       label: "Logout",
       path: "/logout",
-    }
-  ]
-  
+    },
+  ];
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [userName, setUserName] = useState("Loading...");
+  const [userEmail, setUserEmail] = useState("");
 
   const handleDropdownToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -39,14 +44,37 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
   };
 
   const handleMenuItemClick = (item: dropdownMenu) => {
-    setIsDropdownOpen(false); // Close dropdown first
-    
+    setIsDropdownOpen(false); 
+
     if (item.path === "/logout") {
-      onLogoutClick(); // Call the logout handler
+      onLogoutClick(); 
     } else {
-      onChangeState(item.path); // Navigate to other pages
+      onChangeState(item.path); 
     }
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      
+      const docRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setUserName(data.name || currentUser.displayName || "Unknown User");
+        setUserEmail(data.email || currentUser.email || "");
+      } else {
+     
+        setUserName(currentUser.displayName || "Unknown User");
+        setUserEmail(currentUser.email || "");
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <>
@@ -58,7 +86,10 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
         <div className="relative z-10 px-6 py-3 flex items-center justify-between h-full">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
-              <img src={logo} className="w-[70px] h-[70px] text-white drop-shadow-sm" />
+            <img
+              src={logo}
+              className="w-[70px] h-[70px] text-white drop-shadow-sm"
+            />
             <h1 className="text-white text-2xl font-semibold tracking-tight drop-shadow-sm">
               Smart Library: Online Book Reservation and Monitoring System
             </h1>
@@ -76,8 +107,10 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-white text-sm font-medium">John Doe</div>
-                  <div className="text-white/80 text-xs">Librarian</div>
+                  <div className="text-white text-sm font-medium">
+                    {userName}
+                  </div>
+                  <div className="text-white/80 text-xs">Admin</div>
                 </div>
                 <ChevronDown
                   className={`w-4 h-4 text-white transition-transform duration-200 ${
@@ -104,10 +137,13 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
               <div className="bg-blue-500 rounded-full p-2">
                 <User className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <div className="font-semibold text-gray-900">John Doe</div>
-                <div className="text-sm text-gray-600">
-                  john.doe@library.com
+              <div className="min-w-0">
+                <div className="font-semibold text-gray-900">{userName}</div>
+                <div
+                  className="text-sm text-gray-600 truncate max-w-[180px]"
+                  title={userEmail}
+                >
+                  {userEmail}
                 </div>
               </div>
             </div>
@@ -120,8 +156,20 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
                 className="w-full flex items-center px-6 py-3 hover:bg-gray-100 transition-colors duration-150 text-left"
                 onClick={() => handleMenuItemClick(item)}
               >
-                <div className={`mr-4 ${item.label === "Logout" ? "text-red-500" : "text-gray-900"}`}>{item.icon}</div>
-                <div className={`font-medium ${item.label === "Logout" ? "text-red-500" : "text-gray-900"}`}>{item.label}</div>
+                <div
+                  className={`mr-4 ${
+                    item.label === "Logout" ? "text-red-500" : "text-gray-900"
+                  }`}
+                >
+                  {item.icon}
+                </div>
+                <div
+                  className={`font-medium ${
+                    item.label === "Logout" ? "text-red-500" : "text-gray-900"
+                  }`}
+                >
+                  {item.label}
+                </div>
               </button>
             ))}
           </div>

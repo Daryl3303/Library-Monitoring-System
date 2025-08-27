@@ -1,41 +1,37 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { auth } from "../firebase/firebase"; 
 
 interface AuthContextType {
   userId: string | null;
-  setUserId: (id: string | null) => void;
   logout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [userId, setUserIdState] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
- 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userId");
-    if (storedUser) {
-      setUserIdState(storedUser);
-    }
+    // Listen for changes (sign in, refresh, sign out)
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      setUserId(user ? user.uid : null);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-
-  const setUserId = (id: string | null) => {
-    if (id) {
-      localStorage.setItem("userId", id);
-    } else {
-      localStorage.removeItem("userId");
-    }
-    setUserIdState(id);
-  };
-
-  const logout = () => {
+  const logout = async () => {
+    await signOut(auth);
     setUserId(null);
   };
 
   return (
-    <AuthContext.Provider value={{ userId, setUserId, logout }}>
-      {children}
+    <AuthContext.Provider value={{ userId, logout, loading }}>
+      {!loading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 };
