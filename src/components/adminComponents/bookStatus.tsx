@@ -56,6 +56,7 @@ export default function LibraryUserTable() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState<FormData>({
     coverPage: "",
@@ -97,10 +98,25 @@ export default function LibraryUserTable() {
     fetchBooks();
   }, []);
 
+
+   const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // converts to Base64 string
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleAddBook = async () => {
+    if (!file) return;
+
     try {
-      const docRef = await addDoc(collection(db, "books"), formData);
-      setBooks([...books, { id: docRef.id, ...formData }]);
+      const base64String = await fileToBase64(file);
+      const newBook = { ...formData, coverPage: base64String };
+
+      const docRef = await addDoc(collection(db, "books"), newBook);
+      setBooks([...books, { id: docRef.id, ...newBook }]);
       setShowAddModal(false);
       resetForm();
     } catch (error) {
@@ -112,6 +128,12 @@ export default function LibraryUserTable() {
   const handleEditBook = async () => {
     if (selectedBook) {
       try {
+        let updatedData = { ...formData };
+
+        if (file) {
+        const base64String = await fileToBase64(file);
+        updatedData.coverPage = base64String;
+      }
         const bookRef = doc(db, "books", selectedBook.id as string);
         await updateDoc(bookRef, { ...formData });
 
@@ -197,7 +219,7 @@ export default function LibraryUserTable() {
   };
 
   return (
-    <div className="bg-gray-50 h-screen overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 h-screen overflow-y-auto">
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
@@ -283,9 +305,17 @@ export default function LibraryUserTable() {
               <tbody className="bg-white divide-y divide-blue-200">
                 {filteredBooks.map((book) => (
                   <tr key={book.id} className="hover:bg-gray-50">
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 font-medium text-center">
-                      {book.title}
-                    </td>
+                    <td className="px-3 sm:px-6 py-3 text-center">
+  {book.coverPage ? (
+    <img
+      src={book.coverPage}
+      alt={book.title}
+      className="w-16 h-20 object-cover rounded"
+    />
+  ) : (
+    <span className="text-gray-400">No Cover</span>
+  )}
+</td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       {book.author}
                     </td>

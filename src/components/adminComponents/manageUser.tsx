@@ -6,7 +6,7 @@ import DeleteConfirmationModal from "../modals/DeleteUser";
 
 import {
   collection,
-  addDoc,
+  setDoc,
   getDocs,
   updateDoc,
   deleteDoc,
@@ -16,8 +16,6 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
-  updatePassword,
-  deleteUser, 
 } from "firebase/auth";
 import { db } from "../../firebase/firebase";
 
@@ -55,6 +53,7 @@ export default function LibraryUserTable() {
   const auth = getAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState("");
   const [selectedDepartment, setSelectedDepartment] =
     useState("All Departments");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -71,7 +70,7 @@ export default function LibraryUserTable() {
     role: "Student",
   });
 
-  // Filter users based on search and department
+
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name
       .toLowerCase()
@@ -100,73 +99,57 @@ export default function LibraryUserTable() {
   }, []);
 
   const handleAddUser = async () => {
-    try {
-      // 1️⃣ Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.password
+    );
 
-      const user = userCredential.user;
-
-      // 2️⃣ Update display name
-      if (formData.name) {
-        await updateProfile(user, { displayName: formData.name });
-      }
-
-      // 3️⃣ Add user record to Firestore
-      const docRef = await addDoc(collection(db, "users"), {
-        uid: user.uid,
-        name: formData.name,
-        email: formData.email,
-        number: formData.number || "",
-        department: formData.department || "",
-        year: formData.role === "Student" ? formData.year : "",
-        role: formData.role,
-        createdAt: new Date(),
-      });
-
-      // 4️⃣ Update local state - FIXED VERSION
-      const newUser: User = {
-        id: docRef.id,
-        uid: user.uid,
-        name: formData.name, 
-        email: formData.email, 
-        number: formData.number,
-        department: formData.department,
-        year: formData.year,
-        role: formData.role,
-      };
-
-      setUsers([...users, newUser]);
-
-      // 5️⃣ Close modal + reset form
-      setShowAddModal(false);
-      resetForm();
-    } catch (error: any) {
-      console.error("Error adding user:", error.message);
+    const user = userCredential.user;
+    if (formData.name) {
+      await updateProfile(user, { displayName: formData.name });
     }
-  };
+
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: formData.name,
+      email: formData.email,
+      number: formData.number || "",
+      department: formData.department || "",
+      year: formData.role === "Student" ? formData.year : "",
+      role: formData.role,
+      createdAt: new Date(),
+    });
+
+   
+    const newUser: User = {
+      id: user.uid,
+      uid: user.uid,
+      name: formData.name,
+      email: formData.email,
+      number: formData.number,
+      department: formData.department,
+      year: formData.role === "Student" ? formData.year : "",
+      role: formData.role,
+    };
+
+    setUsers([...users, newUser]);
+
+ 
+    setShowAddModal(false);
+    resetForm();
+  } catch (err: any) {
+    console.error("Signup error:", err.message);
+      setError(err.message);
+  }
+};
 
   const handleEditUser = async () => {
-     if (selectedUser) {
+  if (selectedUser) {
     try {
-      const currentAuthUser = auth.currentUser;
-      
-
-      if (currentAuthUser && currentAuthUser.uid === selectedUser.uid) {
-        if (formData.name !== selectedUser.name) {
-          await updateProfile(currentAuthUser, { 
-            displayName: formData.name 
-          });
-        }
-
-        if (formData.password && formData.password.trim() !== "") {
-          await updatePassword(currentAuthUser, formData.password);
-        }
-      }
       const userRef = doc(db, "users", selectedUser.id as string);
+
       const updateData = {
         name: formData.name,
         number: formData.number,
@@ -175,29 +158,19 @@ export default function LibraryUserTable() {
         role: formData.role,
         updatedAt: new Date(),
       };
-      
       await updateDoc(userRef, updateData);
-
       setUsers(
         users.map((user) =>
-          user.id === selectedUser.id 
-            ? { 
-                ...user, 
-                name: formData.name,
-                number: formData.number,
-                department: formData.department,
-                year: formData.year,
-                role: formData.role,
-              }
+          user.id === selectedUser.id
+            ? { ...user, ...updateData }
             : user
         )
       );
 
       setShowEditModal(false);
       resetForm();
-      
+
       console.log("User updated successfully");
-      
     } catch (error: any) {
       console.error("Error updating user:", error);
     }
@@ -261,10 +234,11 @@ export default function LibraryUserTable() {
     setShowEditModal(false);
     setShowDeleteModal(false);
     resetForm();
+    setError("");
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
@@ -347,7 +321,9 @@ export default function LibraryUserTable() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-blue-200">
-                {filteredUsers.map((user) => (
+                {filteredUsers.
+                slice().
+                sort((a,b) => a.name.localeCompare(b.name)).map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
                       {user.name}
@@ -425,6 +401,7 @@ export default function LibraryUserTable() {
       <UserFormModal
         isOpen={showAddModal}
         isEdit={false}
+        error={error}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleAddUser}
@@ -434,6 +411,7 @@ export default function LibraryUserTable() {
       <UserFormModal
         isOpen={showEditModal}
         isEdit={true}
+        error={error}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleEditUser}

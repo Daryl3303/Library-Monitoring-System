@@ -1,4 +1,6 @@
 import { X } from "lucide-react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 interface FormData {
   name: string;
@@ -14,6 +16,7 @@ interface UserFormModalProps {
   isOpen: boolean;
   isEdit: boolean;
   formData: FormData;
+  error: string;
   setFormData: (data: FormData) => void;
   onSubmit: () => void;
   onClose: () => void;
@@ -32,12 +35,15 @@ const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 function UserFormModal({
   isOpen,
   isEdit,
+  error,
   formData,
   setFormData,
   onSubmit,
   onClose,
 }: UserFormModalProps) {
   if (!isOpen) return null;
+
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -55,11 +61,17 @@ function UserFormModal({
           </button>
         </div>
 
+        {error && (
+          <div className="w-full max-w-sm mb-4 p-3 sm:p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg transform transition-all duration-300 animate-fade-in font-inter">
+            <p className="font-medium text-sm sm:text-base">{error}</p>
+          </div>
+        )}
+
         {/* Form */}
         <form
           className="p-6"
           onSubmit={(e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             onSubmit();
           }}
         >
@@ -105,26 +117,39 @@ function UserFormModal({
             </div>
 
             {/* Password - Different behavior for edit vs add */}
+            {!isEdit && (
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
                 Password
-                {isEdit && (
-                  <span className="text-xs text-gray-500 ml-1">
-                    (Leave blank to keep current password)
-                  </span>
-                )}
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder={isEdit ? "Enter new password (optional)" : "Enter password"}
-                required={!isEdit}
-              />
+              
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full px-3 py-2 pr-12 border border-blue-300 rounded-lg 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg transition-colors"
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
             </div>
+              )}
 
             {/* Phone Number */}
             <div>
@@ -174,13 +199,16 @@ function UserFormModal({
               </label>
               <select
                 value={formData.role}
-                onChange={(e) =>{
-                  const newRole = e.target.value as "Student" | "Teacher" | "Admin";
+                onChange={(e) => {
+                  const newRole = e.target.value as
+                    | "Student"
+                    | "Teacher"
+                    | "Admin";
                   setFormData({
                     ...formData,
                     role: newRole,
                     year: newRole === "Student" ? "1st Year" : "N/A",
-                  })
+                  });
                 }}
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -189,33 +217,32 @@ function UserFormModal({
                 <option value="Admin">Admin</option>
               </select>
             </div>
-                
+
             {/* Year */}
             {formData.role === "Student" && (
-            <div>
-              <label className="block text-sm font-semibold text-blue-700 mb-1">
-                Year Level
-              </label>
-              <select
-                value={formData.year}
-                onChange={(e) =>
-                  setFormData({ ...formData, year: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option disabled value="">
-                  Select Year
-                </option>
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
+              <div>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">
+                  Year Level
+                </label>
+                <select
+                  value={formData.year}
+                  onChange={(e) =>
+                    setFormData({ ...formData, year: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option disabled value="">
+                    Select Year
                   </option>
-                ))}
-              </select>
-            </div>
-             )}
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
-           
 
           {/* Buttons */}
           <div className="flex gap-3 mt-8">

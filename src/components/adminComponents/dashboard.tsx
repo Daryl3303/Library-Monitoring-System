@@ -5,7 +5,8 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  LayoutDashboard
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
@@ -76,13 +77,23 @@ const Dashboard: React.FC<DashboardProps> = ( {}) => {
   }, []);
  
   return (
-    <div className="bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Library Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome to LCC-Isabela Library Management System</p>
+        <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
+              <LayoutDashboard className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+                Dashboard
+              </h1>
+              <p className="mt-2 text-gray-600">Welcome to LCC-Isabela Library Management System</p>
+            </div>
+          </div>
         </div>
+        
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

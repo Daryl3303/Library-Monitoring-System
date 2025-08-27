@@ -8,6 +8,7 @@ import ReservationReport from "./adminComponents/reservationReport";
 import BookReports from "./adminComponents/bookReport";
 import ManageReservation from "./adminComponents/manageReservation";
 import ManageUser from "./adminComponents/manageUser";
+import UserProfile from "./userProfile";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -106,10 +107,13 @@ const Admin: React.FC = () => {
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
+    const { logout } = useAuth();  
+  const navigate = useNavigate();
+
    useEffect(() => {
     const currentPath = location.pathname;
     
-    // Map URL paths to internal page states
+    
     const pathMapping: { [key: string]: string } = {
       '/admin': '/',
       '/admin/dashboard': '/',
@@ -119,24 +123,22 @@ const Admin: React.FC = () => {
       '/admin/book-report': '/bookReport',
       '/admin/manage-reservation': '/manageReservation',
       '/admin/manage-user': '/manageUser',
+      '/admin/user-profile': '/userProfile',
     };
 
-    // Set the page state based on current URL
     const mappedPath = pathMapping[currentPath] || '/';
     setPageState(mappedPath);
   }, [location.pathname]);
 
-  const { setUserId } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogoutClick = (): void => {
     setLogoutModalOpen(true);
   };
 
-  const handleLogoutConfirm = (): void => {
-    setUserId(null);
+  const handleLogoutConfirm = async (): Promise<void> => {
+    await logout();               
     setLogoutModalOpen(false);
-    navigate("/signIn");
+    navigate("/signIn");         
   };
 
   const handlePageChange = (path: string): void => {
@@ -153,6 +155,7 @@ const Admin: React.FC = () => {
         '/bookReport': '/admin/book-report',
         '/manageReservation': '/admin/manage-reservation',
         '/manageUser': '/admin/manage-user',
+        '/userProfile': '/admin/user-profile',
       };
 
       const urlPath = urlMapping[path] || '/admin/dashboard';
@@ -233,6 +236,11 @@ const Admin: React.FC = () => {
           {pageState === "/manageUser" && (
             <div className="animate-fade-in">
               <ManageUser />
+            </div>
+          )}
+          {pageState === "/userProfile" && (
+            <div className="animate-fade-in">
+              <UserProfile />
             </div>
           )}
         </div>

@@ -6,10 +6,13 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { userId } = useAuth();
+  const { userId, loading } = useAuth();
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   if (!userId) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/signin" replace />;
   }
 
   return children;
