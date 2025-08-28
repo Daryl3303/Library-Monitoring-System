@@ -19,7 +19,7 @@ interface Book {
   coverPage: string;
   title: string;
   author: string;
-  overview: string;
+  description: string;
   publisher: string;
   date: string;
   isbn: string;
@@ -31,7 +31,7 @@ interface FormData {
   coverPage: string;
   title: string;
   author: string;
-  overview: string;
+  description: string;
   publisher: string;
   date: string;
   isbn: string;
@@ -56,13 +56,12 @@ export default function LibraryUserTable() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState<FormData>({
     coverPage: "",
     title: "",
     author: "",
-    overview: "",
+    description: "",
     publisher: "",
     date: "",
     isbn: "",
@@ -99,21 +98,11 @@ export default function LibraryUserTable() {
   }, []);
 
 
-   const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file); // converts to Base64 string
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
+
 
   const handleAddBook = async () => {
-    if (!file) return;
-
     try {
-      const base64String = await fileToBase64(file);
-      const newBook = { ...formData, coverPage: base64String };
+      const newBook = { ...formData };
 
       const docRef = await addDoc(collection(db, "books"), newBook);
       setBooks([...books, { id: docRef.id, ...newBook }]);
@@ -128,25 +117,19 @@ export default function LibraryUserTable() {
   const handleEditBook = async () => {
     if (selectedBook) {
       try {
-        let updatedData = { ...formData };
+        const updatedData = { ...formData };
 
-        if (file) {
-        const base64String = await fileToBase64(file);
-        updatedData.coverPage = base64String;
-      }
         const bookRef = doc(db, "books", selectedBook.id as string);
         await updateDoc(bookRef, { ...formData });
-
-        // Update local state after successful Firestore update
         setBooks(
           books.map((book) =>
-            book.id === selectedBook.id ? { ...book, ...formData } : book
+            book.id === selectedBook.id ? { ...book, ...updatedData } : book
           )
         );
 
         setShowEditModal(false);
         resetForm();
-      } catch (error) {
+      } catch (error) {  
         console.error("Error updating book:", error);
       }
     }
@@ -155,13 +138,8 @@ export default function LibraryUserTable() {
   const handleDeleteBook = async () => {
     if (selectedBook) {
       try {
-        // Delete from Firestore
         await deleteDoc(doc(db, "books", selectedBook.id as string));
-
-        // Update local state
         setBooks(books.filter((book) => book.id !== selectedBook.id));
-
-        // Reset UI states
         setShowDeleteModal(false);
         setSelectedBook(null);
       } catch (error) {
@@ -175,7 +153,7 @@ export default function LibraryUserTable() {
       coverPage: "",
       title: "",
       author: "",
-      overview: "",
+      description: "",
       publisher: "",
       date: "",
       isbn: "",
@@ -196,7 +174,7 @@ export default function LibraryUserTable() {
       coverPage: book.coverPage,
       title: book.title,
       author: book.author,
-      overview: book.overview,
+      description: book.description,
       publisher: book.publisher,
       date: book.date,
       isbn: book.isbn,
@@ -305,17 +283,9 @@ export default function LibraryUserTable() {
               <tbody className="bg-white divide-y divide-blue-200">
                 {filteredBooks.map((book) => (
                   <tr key={book.id} className="hover:bg-gray-50">
-                    <td className="px-3 sm:px-6 py-3 text-center">
-  {book.coverPage ? (
-    <img
-      src={book.coverPage}
-      alt={book.title}
-      className="w-16 h-20 object-cover rounded"
-    />
-  ) : (
-    <span className="text-gray-400">No Cover</span>
-  )}
-</td>
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 font-semibold text-center">
+                      {book.title}
+                    </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       {book.author}
                     </td>
@@ -333,7 +303,7 @@ export default function LibraryUserTable() {
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-center">
                        <span className={`px-3 py-1 text-s font-medium rounded-full text-center                   
-                        ${book.quantity ? "text-green-500" : "text-red-500 bg-red-100"}`}> 
+                        ${book.quantity ? "text-green-600" : "text-red-500 bg-red-100"}`}> 
                       {book.quantity > 0 ? (book.quantity + " " + "left") : "Not Available"}
                       </span>  
                     </td>

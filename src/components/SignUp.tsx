@@ -63,8 +63,8 @@ const SignUp = () => {
         createdAt: new Date(),
       });
 
-      // ✅ No need setUserId(), context handles it automatically
-      navigate("/");
+    
+      navigate("/user");
     } catch (err: any) {
       console.error("Signup error:", err.message);
       setError(err.message);

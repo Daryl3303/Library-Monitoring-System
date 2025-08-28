@@ -33,7 +33,7 @@ const SignIn = () => {
       if (userDoc.exists()) {
         const { role } = userDoc.data();
         if (role === "Admin") navigate("/admin");
-        else navigate("/");
+        else navigate("/user");
       } else {
         setError("No user profile found in Firestore.");
       }

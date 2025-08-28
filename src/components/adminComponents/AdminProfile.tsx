@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { updatePassword } from 'firebase/auth';
-import { db, auth } from '../firebase/firebase';
-import { User, Eye, EyeOff, Mail, Phone, Building2, Shield } from 'lucide-react';
+import { db, auth } from '../../firebase/firebase';
+import { User, Eye, EyeOff, Mail, Phone, Building2} from 'lucide-react';
 
 const UserProfile: React.FC = () => {
   const [adminData, setAdminData] = useState({
@@ -307,9 +307,8 @@ const UserProfile: React.FC = () => {
                         name="email"
                         value={adminData.email}
                         onChange={handleInputChange}
-                        className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all duration-300 text-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 ${
-                          errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                        readOnly
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl border-2"
                         placeholder="Enter your email address"
                       />
                     </div>
