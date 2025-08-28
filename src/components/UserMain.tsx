@@ -1,14 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import Sidebar from "./adminComponents/sidebar";
-import Navbar from "./adminComponents/navbar";
-import Dashboard from "./adminComponents/dashboard";
-import Reservation from "./adminComponents/reservation";
-import BookStatus from "./adminComponents/bookStatus";
-import ReservationReport from "./adminComponents/reservationReport";
-import BookReports from "./adminComponents/bookReport";
-import ManageReservation from "./adminComponents/manageReservation";
-import ManageUser from "./adminComponents/manageUser";
-import UserProfile from "./adminComponents/AdminProfile";
+import UserNavbar from "./userComponents/userNavbar";
+import WelcomePage from "./userComponents/welcomePage" 
+import UserProfile from "./userComponents/UserProfile";
+import ViewBooks from "./userComponents/viewBooks";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -80,7 +74,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
             Confirm Logout
           </h3>
           <p className="text-center text-gray-600">
-            Are you sure you want to logout? Any unsaved changes may be lost.
+            Are you sure you want to logout?
           </p>
         </div>
         <div className="bg-gray-50 px-6 py-4 flex justify-center space-x-3 rounded-b-lg">
@@ -101,7 +95,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
     </div>
   );
 };
-const Admin: React.FC = () => {
+const UserMain: React.FC = () => {
   const [pageState, setPageState] = useState<string>("/");
    const location = useLocation();
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
@@ -115,15 +109,10 @@ const Admin: React.FC = () => {
     
     
     const pathMapping: { [key: string]: string } = {
-      '/admin': '/',
-      '/admin/dashboard': '/',
-      '/admin/reservation': '/reservation',
-      '/admin/book-status': '/bookStatus',
-      '/admin/reservation-report': '/reservationReport',
-      '/admin/book-report': '/bookReport',
-      '/admin/manage-reservation': '/manageReservation',
-      '/admin/manage-user': '/manageUser',
-      '/admin/user-profile': '/userProfile',
+      '/user': '/',
+      '/user/welcome': '/',
+      '/user/user-profile': '/userProfile',
+      '/user/view-books': '/viewBooks',
     };
 
     const mappedPath = pathMapping[currentPath] || '/';
@@ -148,14 +137,9 @@ const Admin: React.FC = () => {
       setIsTransitioning(true);
 
       const urlMapping: { [key: string]: string } = {
-        '/': '/admin/dashboard',
-        '/reservation': '/admin/reservation',
-        '/bookStatus': '/admin/book-status',
-        '/reservationReport': '/admin/reservation-report',
-        '/bookReport': '/admin/book-report',
-        '/manageReservation': '/admin/manage-reservation',
-        '/manageUser': '/admin/manage-user',
-        '/userProfile': '/admin/user-profile',
+        '/': '/user/welcome',
+        '/userProfile': '/user/user-profile',
+        '/viewBooks': '/user/view-books',
       };
 
       const urlPath = urlMapping[path] || '/admin/dashboard';
@@ -172,9 +156,9 @@ const Admin: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <div
         className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow"
-        style={{ zIndex: 60 }}
+        style={{ zIndex: 60 }}  
       >
-        <Navbar
+        <UserNavbar
           onChangeState={(path) => {
             if (path === "/logout") {
               setLogoutModalOpen(true);
@@ -185,20 +169,14 @@ const Admin: React.FC = () => {
           onLogoutClick={handleLogoutClick}
         />
       </div>
-      
-      <div
-        className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300"
-        style={{ zIndex: 50 }}
-      >
-        <Sidebar currentPage={pageState} onPageChange={handlePageChange} />
-      </div>
-
+  
+       
       <main
-        className="flex-1 transition-all duration-300 ml-64 pt-[60px] min-h-screen bg-gray-50"
+        className="transition-all duration-300 pt-[60px] min-h-screen bg-gray-50"
         style={{ zIndex: 40 }}
       >
         <div
-          className={`p-6 transition-all duration-300 ease-in-out transform ${
+          className={` transition-all duration-300 ease-in-out transform ${
             isTransitioning
               ? "opacity-0 translate-y-2 scale-95"
               : "opacity-100 translate-y-0 scale-100"
@@ -206,42 +184,19 @@ const Admin: React.FC = () => {
         >
           {pageState === "/" && (
             <div className="animate-fade-in">
-              <Dashboard />
+              <WelcomePage onViewBooks={() => handlePageChange("/viewBooks")}/>
             </div>
           )}
-          {pageState === "/reservation" && (
-            <div className="animate-fade-in">
-              <Reservation />
-            </div>
-          )}
-          {pageState === "/bookStatus" && (
-            <div className="animate-fade-in">
-              <BookStatus />
-            </div>
-          )}
-          {pageState === "/reservationReport" && (
-            <div className="animate-fade-in">
-              <ReservationReport />
-            </div>
-          )}
-          {pageState === "/bookReport" && (
-            <div className="animate-fade-in">
-              <BookReports />
-            </div>
-          )}
-          {pageState === "/manageReservation" && (
-            <div className="animate-fade-in">
-              <ManageReservation />
-            </div>
-          )}
-          {pageState === "/manageUser" && (
-            <div className="animate-fade-in">
-              <ManageUser />
-            </div>
-          )}
+
           {pageState === "/userProfile" && (
             <div className="animate-fade-in">
               <UserProfile />
+            </div>
+          )}
+
+          {pageState === "/viewBooks" && (
+            <div className="animate-fade-in">
+              <ViewBooks />
             </div>
           )}
         </div>
@@ -256,4 +211,4 @@ const Admin: React.FC = () => {
   );
 };
 
-export default Admin;
+export default UserMain;

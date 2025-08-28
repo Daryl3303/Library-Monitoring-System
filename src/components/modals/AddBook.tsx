@@ -4,7 +4,7 @@ interface FormData {
   coverPage: string;
   title: string;
   author: string;
-  overview: string;
+  description: string;
   publisher: string;
   date: string;
   isbn: string;
@@ -78,7 +78,6 @@ function AddBookModal({
                   if (file) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                      // Save the base64 string to formData.coverPage
                       setFormData({
                         ...formData,
                         coverPage: reader.result as string,
@@ -88,7 +87,7 @@ function AddBookModal({
                   }
                 }}
                 className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required={!formData.coverPage} // only required when adding new
+                required={!formData.coverPage}
               />
             </div>
 
@@ -225,12 +224,12 @@ function AddBookModal({
               {/* Overview - Full Width */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
-                  Overview
+                  Book Description
                 </label>
                 <textarea
-                  value={formData.overview}
+                  value={formData.description}
                   onChange={(e) =>
-                    setFormData({ ...formData, overview: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Book's Overview"

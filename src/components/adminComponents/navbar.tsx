@@ -1,4 +1,3 @@
-// Fixed Navbar.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, User } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
