@@ -3,7 +3,7 @@ import { ChevronDown, User, Menu } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { TiHome } from "react-icons/ti";
-import logo from "../../assets/logo.png";
+import logo from "logo.png";
 import { auth, db } from "../../firebase/firebase";
 import { getDocs, collection } from "firebase/firestore";
 

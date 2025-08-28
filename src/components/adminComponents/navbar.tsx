@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, User } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
-import logo from "../../assets/logo.png";
-
+import logo from "logo.png";
 import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
