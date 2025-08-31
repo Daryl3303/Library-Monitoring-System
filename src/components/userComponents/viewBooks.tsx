@@ -5,15 +5,16 @@ import {
   X,
   Book,
   Calendar,
-  User,
   Building2,
+  User,
   Hash,
   FileText,
 } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { collection, getDocs, getDoc, doc,addDoc } from "firebase/firestore";
+import { db, auth } from "../../firebase/firebase";
+import ReserveModal from "../modals/reservationForm";
 
-interface Book {
+export interface Book {
   id?: string;
   coverPage: string;
   title: string;
@@ -22,30 +23,85 @@ interface Book {
   publisher: string;
   date: string;
   isbn: string;
-  department: string;
+  genre: string;
   quantity: number;
 }
 
-const LibraryBookBrowser: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
+interface User {
+  id?: string;
+  uid?: string;
+  name: string;
+  email: string;
+  number: string;
+  department: string;
+  year: string;
+  role: string;
+}
 
+interface FormData {
+  uid?: string;
+  name: string;
+  email: string;
+  department: string;
+  year: string;
+  address: string;
+  phone: string;
+  bookTitle: string;
+  bookAuthor: string;
+  bookIsbn: string;
+  role: string;
+  quantity: number;
+  createdAt: string;
+}
+
+interface Reservation {
+  id?: string;
+  name: string;
+  email: string;
+  department: string;
+  year: string;
+  address: string;
+  phone: string;
+  bookTitle: string;
+  bookAuthor: string;
+  bookIsbn: string;
+  role: string;
+  quantity: number;
+  createdAt: string;
+}
+
+const ViewBooks: React.FC = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+  const[reservations, setReservations] = useState<Reservation[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("All");
+  const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
+  const [selectedGenre, setSelectedGenre] = useState<string>("All Book Genres");
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    department: "",
+    year: "",
+    address: "",
+    phone: "",
+    bookTitle: "",
+    bookAuthor: "",
+    bookIsbn: "",
+    role: "",
+    quantity: 0,
+    createdAt: "",
+  });
 
-  const departments = [
-    "All",
-    ...Array.from(new Set(books.map((book) => book.department))),
-  ];
 
   const fetchBooks = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "books"));
       const booksData: Book[] = querySnapshot.docs.map((document) => {
         const data = document.data() as Book;
-
         return {
           id: document.id,
           title: data.title,
@@ -53,7 +109,7 @@ const LibraryBookBrowser: React.FC = () => {
           publisher: data.publisher,
           date: data.date,
           isbn: data.isbn,
-          department: data.department,
+          genre: data.genre,
           quantity: data.quantity,
           description: data.description,
           coverPage: data.coverPage || "",
@@ -61,12 +117,36 @@ const LibraryBookBrowser: React.FC = () => {
       });
 
       setBooks(booksData);
+
+      const uniqueGenres = Array.from(
+      new Set(
+        booksData.map((b) => b.genre?.trim().toLowerCase()).filter(Boolean)))
+                 .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+                 .sort();
+
+   
+    setGenres(["All Book Genres", ...uniqueGenres]);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
   };
 
+  const fetchCurrentUser = async () => {
+    try {
+      const authUser = auth.currentUser;
+      if (authUser) {
+        const userDoc = await getDoc(doc(db, "users", authUser.uid));
+        if (userDoc.exists()) {
+          setCurrentUser({ id: userDoc.id, ...userDoc.data() } as User);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  };
+
   useEffect(() => {
+    fetchCurrentUser();
     fetchBooks();
   }, []);
 
@@ -91,14 +171,14 @@ const LibraryBookBrowser: React.FC = () => {
       );
     }
 
-    if (selectedDepartment !== "All") {
+    if (selectedGenre !== "All Book Genres") {
       filtered = filtered.filter(
-        (book) => book.department === selectedDepartment
+        (book) => book.genre?.toLowerCase() === selectedGenre.toLowerCase()
       );
     }
 
     setFilteredBooks(filtered);
-  }, [searchQuery, selectedDepartment, books]);
+  }, [searchQuery, selectedGenre, books]);
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -108,9 +188,43 @@ const LibraryBookBrowser: React.FC = () => {
     setSelectedBook(null);
   };
 
-  const handleReserve = (bookId: string) => {
-    console.log("Reserving book:", bookId);
+  const handleReserve = (book: Book) => {
+    if (!currentUser) return;
+    setSelectedBook(book);
+    setFormData({
+      uid: currentUser.uid,
+      name: currentUser.name,
+      email: currentUser.email,
+      department: currentUser.department,
+      year: currentUser.year,
+      address: "",
+      phone: currentUser.number,
+      bookTitle: book.title,
+      bookAuthor: book.author,
+      bookIsbn: book.isbn,
+      role: currentUser.role,
+      quantity: 0,
+      createdAt: new Date().toISOString(),
+    });
+    setShowAddModal(true);
   };
+
+
+
+
+    const handleAddReservation = async() => {
+    try {
+          const newReservations = { ...formData };
+    
+          const docRef = await addDoc(collection(db, "reservations"), newReservations);
+          setReservations([...reservations, { id: docRef.id, ...newReservations }]);
+          setShowAddModal(false);
+        } catch (error) {
+          console.error("Error Reservation:", error);
+          console.log(reservations)
+        }
+      };
+
 
   const BookCard: React.FC<{ book: Book }> = ({ book }) => (
     <div
@@ -151,16 +265,17 @@ const LibraryBookBrowser: React.FC = () => {
 
   const BookOverview: React.FC<{
     book: Book;
+    currentUser: User | null;
     onClose: () => void;
-    onReserve: (id: string) => void;
+    onReserve: (book: Book, userId?: string) => void;
   }> = ({ book, onClose, onReserve }) => (
     <div
       className={`bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-2xl border border-slate-200/50 backdrop-blur-sm ${
-        isMobile ? "fixed inset-0 z-50 overflow-y-auto" : "sticky top-4"
+        isMobile ? "fixed inset-4 z-50 flex flex-col max-h-[calc(100vh-2rem)] overflow-hidden" 
+          : "sticky top-4"
       }`}
     >
-      <div className="p-6 relative">
-        {/* Header with gradient background */}
+      <div className={`${isMobile ? 'flex-1 overflow-y-auto' : ''} p-6 relative`}>
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/50">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
             About This Book
@@ -174,7 +289,6 @@ const LibraryBookBrowser: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Book Cover with enhanced styling */}
           <div className="relative">
             <div className="aspect-[2/3] w-36 mx-auto bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl overflow-hidden shadow-lg ring-1 ring-slate-200">
               <img
@@ -272,17 +386,18 @@ const LibraryBookBrowser: React.FC = () => {
               </span>
             </div>
 
+            {book.quantity > 0 &&
             <button
-              onClick={() => onReserve(book.id!)}
+              onClick={() => onReserve(book)}
               disabled={book.quantity === 0}
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform shadow-lg ${
                 book.quantity > 0
                   ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl hover:scale-105 active:scale-95"
                   : "bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed shadow-gray-200"
-              }`}
-            >
-              {book.quantity > 0 ? "Reserve Book" : "Not Available"}
+              }`}>
+  Reserve Book
             </button>
+}
           </div>
         </div>
       </div>
@@ -290,9 +405,8 @@ const LibraryBookBrowser: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 mt-7">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Search and Filter Bar */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1 group">
@@ -309,18 +423,20 @@ const LibraryBookBrowser: React.FC = () => {
             </div>
 
             <div className="relative group">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-purple-500 
-              transition-colors duration-200 z-10">
+              <div
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-purple-500 
+              transition-colors duration-200 z-10"
+              >
                 <Filter size={25} />
               </div>
               <select
-                value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
                 className="pl-12 pr-10 py-4 bg-white/80 backdrop-blur-sm border border-slate-300/50 rounded-2xl shadow-lg focus:ring-4
-                 focus:ring-purple-500/20 focus:border-purple-500 focus:bg-white transition-all duration-300 text-slate-700 w-[250px] 
+                 focus:ring-purple-500/20 focus:border-purple-500 focus:bg-white transition-all duration-300 placeholder-slate-400 text-slate-700 w-full 
                  hover:shadow-xl hover:border-slate-400/70 cursor-pointer appearance-none bg-white outline-none"
               >
-                {departments.map((dept) => (
+                {genres.map((dept) => (
                   <option key={dept} value={dept}>
                     {dept === "All" ? "All Departments" : dept}
                   </option>
@@ -330,27 +446,27 @@ const LibraryBookBrowser: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className={`flex gap-6 ${isMobile ? "flex-col" : "flex-row"}`}>
-          {/* Books Grid */}
           <div className={`${selectedBook && !isMobile ? "flex-1" : "w-full"}`}>
             <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b-4 border-blue-600 inline-block pb-1">
               Library Books
             </h1>
 
-            <div
-              className={`grid gap-4 ${
-                selectedBook && !isMobile
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-              }`}
-            >
+             {!(selectedBook && isMobile) && (
+              <div
+                className={`grid gap-4 ${
+                  selectedBook && !isMobile
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                }`}
+              >
               {filteredBooks.map((book) => (
                 <BookCard key={book.id} book={book} />
               ))}
             </div>
+             )}
 
-            {filteredBooks.length === 0 && (
+            {filteredBooks.length === 0 && !(selectedBook && isMobile) && (
               <div className="text-center py-12">
                 <Book className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 text-lg">No books found</p>
@@ -362,7 +478,22 @@ const LibraryBookBrowser: React.FC = () => {
             <div className="w-80 flex-shrink-0">
               <BookOverview
                 book={selectedBook}
+                currentUser={currentUser}
                 onClose={handleCloseOverview}
+                onReserve={handleReserve}
+              />
+
+              <ReserveModal
+                book={selectedBook}
+                currentUser={currentUser}
+                isOpen={showAddModal} 
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={() => {
+                   handleAddReservation();
+                  handleCloseOverview();
+                }}
+                onClose={() => setShowAddModal(false)}
                 onReserve={handleReserve}
               />
             </div>
@@ -372,14 +503,29 @@ const LibraryBookBrowser: React.FC = () => {
         {selectedBook && isMobile && (
           <>
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              className="fixed inset-0 bg-black bg-opacity-50 flex-shrink-0 z-40"
               onClick={handleCloseOverview}
             />
             <BookOverview
               book={selectedBook}
+              currentUser={currentUser}
               onClose={handleCloseOverview}
               onReserve={handleReserve}
             />
+
+            <ReserveModal
+                book={selectedBook}
+                currentUser={currentUser}
+                isOpen={showAddModal} 
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={() => {
+                  handleAddReservation();
+                  handleCloseOverview();
+                }}
+                onClose={() => setShowAddModal(false) }
+                onReserve={handleReserve}
+              />
           </>
         )}
       </div>
@@ -387,4 +533,4 @@ const LibraryBookBrowser: React.FC = () => {
   );
 };
 
-export default LibraryBookBrowser;
+export default ViewBooks;

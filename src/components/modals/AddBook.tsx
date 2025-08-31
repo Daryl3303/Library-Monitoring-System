@@ -8,7 +8,7 @@ interface FormData {
   publisher: string;
   date: string;
   isbn: string;
-  department: string;
+  genre: string;
   quantity: number;
 }
 
@@ -21,13 +21,6 @@ interface AddBookModalProps {
   onClose: () => void;
 }
 
-const departments = [
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration ",
-  "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education ",
-  "Bachelor of Science in Secondary Education",
-];
 
 function AddBookModal({
   isOpen,
@@ -42,7 +35,7 @@ function AddBookModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-blue-200">
-        {/* Header */}
+
         <div className="flex justify-between items-center p-6 border-b border-blue-300 bg-blue-50 rounded-t-2xl">
           <h3 className="text-xl font-bold text-blue-800">
             {isEdit ? "Edit Book" : "Add New Book"}
@@ -55,7 +48,7 @@ function AddBookModal({
           </button>
         </div>
 
-        {/* Form */}
+
         <form
           className="p-6 pb-4"
           onSubmit={(e) => {
@@ -64,7 +57,7 @@ function AddBookModal({
           }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-            {/* Cover Page */}
+     
             
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
@@ -91,7 +84,7 @@ function AddBookModal({
               />
             </div>
 
-              {/* Title */}
+ 
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Title
@@ -108,7 +101,7 @@ function AddBookModal({
                 />
               </div>
 
-              {/* Author */}
+        
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Author
@@ -125,7 +118,6 @@ function AddBookModal({
                 />
               </div>
 
-              {/* Publisher */}
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Publisher
@@ -142,7 +134,6 @@ function AddBookModal({
                 />
               </div>
 
-              {/* Year Published */}
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Year Published
@@ -158,7 +149,7 @@ function AddBookModal({
                 />
               </div>
 
-              {/* ISBN */}
+       
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   ISBN
@@ -175,31 +166,22 @@ function AddBookModal({
                 />
               </div>
 
-              {/* Department */}
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
-                  Department
+                  Book Genre
                 </label>
-                <select
-                  value={formData.department}
+                <input
+                  type="text"
+                  value={formData.genre}
                   onChange={(e) =>
-                    setFormData({ ...formData, department: e.target.value })
+                    setFormData({ ...formData, genre: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
-                >
-                  <option disabled value="">
-                    Select Department
-                  </option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
+                />
+                  
               </div>
 
-              {/* Quantity */}
               <div>
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Quantity
@@ -221,7 +203,6 @@ function AddBookModal({
                 />
               </div>
 
-              {/* Overview - Full Width */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-blue-700 mb-1">
                   Book Description

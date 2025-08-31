@@ -3,7 +3,6 @@ import { ChevronDown, User, Menu } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { TiHome } from "react-icons/ti";
-import logo from "logo.png";
 import { auth, db } from "../../firebase/firebase";
 import { getDocs, collection } from "firebase/firestore";
 
@@ -92,9 +91,9 @@ useEffect(() => {
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
         <div className="relative z-10 w-full px-4 md:px-6 flex items-center justify-between">
-          {/* Logo + Title */}
+         
           <div className="flex items-center space-x-3">
-            <img src={logo} className="w-[50px] h-[50px] md:w-[70px] md:h-[70px]" />
+            <img src="/logo.png" className="w-[50px] h-[50px] md:w-[70px] md:h-[70px]" />
             <h1 className="hidden md:block text-white text-lg md:text-2xl font-semibold tracking-tight drop-shadow-sm">
               Smart Library: Online Book Reservation and Monitoring System
             </h1>
@@ -103,7 +102,7 @@ useEffect(() => {
             </h1>
           </div>
 
-          {/* Desktop User Dropdown */}
+     
           <div className="hidden md:flex items-center space-x-4">
             <div className="relative" ref={dropdownRef}>
               <button
@@ -126,7 +125,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Hamburger */}
+  
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -138,7 +137,7 @@ useEffect(() => {
         </div>
       </nav>
 
-      {/* Desktop Dropdown */}
+
       {isDropdownOpen && (
         <div className="absolute right-6 top-[75px] w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
@@ -181,7 +180,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Mobile Menu */}
+     
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-[60px] right-0 w-60 max-w-[calc(100vw-32px)] bg-white shadow-lg rounded-b-xl z-50 max-h-[calc(100vh-60px)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-gray-100">
