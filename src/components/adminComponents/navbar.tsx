@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, User } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
-import logo from "logo.png";
 import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -85,7 +84,7 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <img
-              src={logo}
+              src="/logo.png"
               className="w-[70px] h-[70px] text-white drop-shadow-sm"
             />
             <h1 className="text-white text-2xl font-semibold tracking-tight drop-shadow-sm">

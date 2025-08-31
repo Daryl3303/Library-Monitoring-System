@@ -9,7 +9,7 @@ interface Book {
   date: string;
   isbn: string;
   quantity: number;
-  department: string;
+  genre: string;
 }
 
 interface DeleteBookModalProps {

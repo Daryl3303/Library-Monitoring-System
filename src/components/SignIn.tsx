@@ -3,12 +3,12 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
+  deleteUser,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import logo from "logo.png";
 import { FcGoogle } from "react-icons/fc";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -61,15 +61,27 @@ const SignIn = () => {
     setAuthing(true);
     setError("");
     try {
-      const response = await signInWithPopup(auth, new GoogleAuthProvider());
-      await redirectByRole(response.user.uid);
-    } catch (err: any) {
-      console.error("Google sign-in error:", err.message);
-      setError("Google sign-in failed.");
-    } finally {
-      setAuthing(false);
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    const user = result.user;
+
+  
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (!userDoc.exists()) {
+      await deleteUser(user);
+      throw new Error("This Google account is not registered. Please contact admin.");
     }
-  };
+
+    await redirectByRole(user.uid);
+  } catch (err: any) {
+    console.error("Google sign-in error:", err.message);
+    setError(err.message || "Google sign-in failed.");
+  } finally {
+    setAuthing(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">
@@ -115,7 +127,7 @@ const SignIn = () => {
           {/* Logo and Title */}
           <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
             <img
-              src={logo}
+              src="/logo.png"
               alt="Logo"
               className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-3 sm:mb-4"
             />

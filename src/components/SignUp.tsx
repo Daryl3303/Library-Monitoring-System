@@ -7,7 +7,6 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import logo from "logo.png";
 import { Eye, EyeOff } from "lucide-react";
 
 const departments = [
@@ -66,12 +65,40 @@ const SignUp = () => {
     
       navigate("/user");
     } catch (err: any) {
-      console.error("Signup error:", err.message);
-      setError(err.message);
-      setAuthing(false);
-    }
-  };
+  console.error("Signup error:", err);
 
+  let message = "Signup failed.";
+
+  switch (err.code) {
+    case "auth/email-already-in-use":
+      message = "Email already in use.";
+      break;
+    case "auth/weak-password":
+    case "auth/missing-password":
+      if (password.length < 6) {
+        message = "Min 6 characters.";
+      } else if (!/[A-Z]/.test(password)) {
+        message = "Need 1 uppercase letter.";
+      } else if (!/[a-z]/.test(password)) {
+        message = "Need 1 lowercase letter.";
+      } else if (!/[0-9]/.test(password)) {
+        message = "Need 1 number.";
+      } else {
+        message = "Invalid password.";
+      }
+      break;
+    case "auth/invalid-email":
+      message = "Invalid email.";
+      break;
+    default:
+      message = err.message?.replace(/^Firebase:\s*/i, "") || message;
+      break;
+  }
+
+  setError(message);
+  setAuthing(false);
+}
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">
       <div
@@ -114,7 +141,7 @@ const SignUp = () => {
           {/* Logo and Title */}
           <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
             <img
-              src={logo}
+              src="/logo.png"
               alt="Logo"
               className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-3 sm:mb-4"
             />

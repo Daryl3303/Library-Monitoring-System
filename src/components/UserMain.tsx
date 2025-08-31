@@ -19,7 +19,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Close modal on outside click
+ 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -172,7 +172,7 @@ const UserMain: React.FC = () => {
   
        
       <main
-        className="transition-all duration-300 pt-[60px] min-h-screen bg-gray-50"
+        className="transition-all duration-300 pt-[80px] min-h-screen bg-gray-50"
         style={{ zIndex: 40 }}
       >
         <div

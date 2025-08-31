@@ -1,4 +1,3 @@
-// LibraryUserTable.tsx
 import { useState, useEffect } from "react";
 import { Search, Plus, Edit2, Trash2, BookText } from "lucide-react";
 import AddBookModal from "../modals/AddBook";
@@ -23,7 +22,7 @@ interface Book {
   publisher: string;
   date: string;
   isbn: string;
-  department: string;
+  genre: string;
   quantity: number;
 }
 
@@ -35,24 +34,16 @@ interface FormData {
   publisher: string;
   date: string;
   isbn: string;
-  department: string;
+  genre: string;
   quantity: number;
 }
 
-const departments = [
-  "All Departments",
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration ",
-  "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education ",
-  "Bachelor of Science in Secondary Education",
-];
 
 export default function LibraryUserTable() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All Departments");
+  const [selectedGenre, setSelectedGenre] = useState<string>("All Book Genres");
+const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -65,19 +56,20 @@ export default function LibraryUserTable() {
     publisher: "",
     date: "",
     isbn: "",
-    department: "",
+    genre: "",
     quantity: 0,
   });
 
-  // Filter books based on search and department
+  
   const filteredBooks = books.filter((book) => {
     const matchesSearch = book.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesDepartment =
-      selectedDepartment === "All Departments" ||
-      book.department === selectedDepartment;
-    return matchesSearch && matchesDepartment;
+
+    const matchesGenres =
+      selectedGenre === "All Book Genres" ||
+      book.genre?.toLowerCase() === selectedGenre.toLowerCase();
+    return matchesSearch && matchesGenres;
   });
 
   const fetchBooks = async () => {
@@ -88,6 +80,15 @@ export default function LibraryUserTable() {
         ...(document.data() as Book),
       }));
       setBooks(booksData);
+
+      const uniqueGenres = Array.from(
+         new Set(
+        booksData
+          .map((book) => book.genre?.trim().toLowerCase())
+          .filter(Boolean))).map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+          .sort();
+
+      setGenres(["All Book Genres", ...uniqueGenres]);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -157,7 +158,7 @@ export default function LibraryUserTable() {
       publisher: "",
       date: "",
       isbn: "",
-      department: "",
+      genre: "",
       quantity: 0,
     });
     setSelectedBook(null);
@@ -178,7 +179,7 @@ export default function LibraryUserTable() {
       publisher: book.publisher,
       date: book.date,
       isbn: book.isbn,
-      department: book.department,
+      genre: book.genre,
       quantity: book.quantity,
     });
     setShowEditModal(true);
@@ -213,13 +214,13 @@ export default function LibraryUserTable() {
           </div>
         </div>
 
-        {/* Book Management Section */}
+      
         <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-              {/* Left side - Search + Department Filter */}
+        
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {/* Search Bar */}
+         
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -231,21 +232,21 @@ export default function LibraryUserTable() {
                   />
                 </div>
 
-                {/* Department Filter */}
+             
                 <select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                 >
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
+                  {genres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Right side - Add Book Button */}
+  
               <button
                 onClick={openAddModal}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md flex items-center justify-center hover:scale-105 duration-300 gap-2 transition-colors w-full sm:w-auto"
@@ -256,7 +257,7 @@ export default function LibraryUserTable() {
             </div>
           </div>
 
-          {/* Table */}
+     
           <div className="overflow-x-auto">
             <table className="w-full text-sm sm:text-base">
               <thead className="bg-gray-50 border-b border-blue-700">
@@ -267,7 +268,7 @@ export default function LibraryUserTable() {
                     "Publisher",
                     "Year",
                     "ISBN",
-                    "Department",
+                    "Genre",
                     "Quantity",
                     "Actions",
                   ].map((header) => (
@@ -299,7 +300,7 @@ export default function LibraryUserTable() {
                       {book.isbn}
                     </td>
                     <td className="px-3 sm:px-6 py-3 text-gray-500 max-w-xs text-center">
-                      {book.department}
+                      {book.genre}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-center">
                        <span className={`px-3 py-1 text-s font-medium rounded-full text-center                   
