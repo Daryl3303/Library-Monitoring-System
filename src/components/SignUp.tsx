@@ -99,7 +99,7 @@ const SignUp = () => {
   setAuthing(false);
 }
   };
-  return (
+ return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">
       <div
         className={`relative w-full max-w-4xl rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row-reverse transform transition-all duration-700 ease-out ${
@@ -108,7 +108,7 @@ const SignUp = () => {
             : "scale-95 opacity-0 translate-y-8"
         }`}
       >
-        {/* Mobile Header - Only visible on small screens */}
+
         <div className="block md:hidden w-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white p-6 text-center">
           <h2 className="text-2xl sm:text-3xl italic font-medium font-serif text-white tracking-wide mb-2 leading-tight">
             Hello!
@@ -118,48 +118,46 @@ const SignUp = () => {
           </p>
         </div>
 
-        {/* Message Side - Hidden on mobile, shown on md+ */}
-        <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center items-center p-6 lg:p-8 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white transform transition-all duration-700 ease-out">
+
+        <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center items-center p-8 lg:p-10 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white transform transition-all duration-700 ease-out">
           <div className="transform transition-all duration-500 hover:scale-105">
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl italic font-medium font-serif text-white tracking-wide text-center mb-4 leading-tight">
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl italic font-medium font-serif text-white tracking-wide text-center mb-6 leading-tight">
               Hello!
             </h2>
-            <p className="mb-6 lg:mb-8 max-w-sm text-blue-100 leading-relaxed font-inter text-sm lg:text-base">
+            <p className="mb-8 lg:mb-10 max-w-md text-blue-100 leading-relaxed font-inter text-base lg:text-lg">
               Fill up your personal information and start your journey with us
             </p>
             <button
               onClick={() => navigate("/signin")}
-              className="px-6 lg:px-8 py-2.5 lg:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-inter tracking-wide text-sm lg:text-base"
+              className="px-8 lg:px-10 py-3 lg:py-4 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-inter tracking-wide text-base lg:text-lg"
             >
               Log In
             </button>
           </div>
         </div>
 
-        {/* Form Side */}
+      
         <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center items-center bg-white transform transition-all duration-700 ease-out">
-          {/* Logo and Title */}
-          <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
+          <div className="w-full flex flex-col justify-center items-center mb-3 sm:mb-4">
             <img
               src="/logo.png"
               alt="Logo"
-              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-3 sm:mb-4"
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-20 md:h-20 mb-2 sm:mb-3"
             />
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4 text-blue-600 font-poppins tracking-wide text-center">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-5 text-blue-600 font-poppins tracking-wide text-center">
               Register
             </h2>
           </div>
 
-          {/* Error Message */}
           {error && (
-            <div className="w-full max-w-sm mb-4 p-3 sm:p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg transform transition-all duration-300 animate-fade-in font-inter">
+            <div className="w-full max-w-md md:max-w-lg mb-4 p-3 sm:p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg transform transition-all duration-300 animate-fade-in font-inter">
               <p className="font-medium text-sm sm:text-base">{error}</p>
             </div>
           )}
 
-          {/* Form */}
+
           <form
-            className="w-full max-w-sm flex flex-col space-y-4 sm:space-y-5 transform transition-all duration-500"
+            className="w-full max-w-sm md:max-w-md flex flex-col space-y-4 sm:space-y-4 md:space-y-4 transform transition-all duration-500"
             onSubmit={(e) => {
               e.preventDefault();
               signUpWithEmail();
@@ -168,7 +166,7 @@ const SignUp = () => {
             <input
               type="text"
               placeholder="Full Name"
-              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+              className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -180,7 +178,7 @@ const SignUp = () => {
             <input
               type="email"
               placeholder="Email Address"
-              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+              className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -195,7 +193,7 @@ const SignUp = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -204,7 +202,7 @@ const SignUp = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-100 rounded-r-2xl transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-transparent  rounded-r-2xl transition-colors"
               >
                 {showPassword ? (
                   <Eye className="h-6 w-6 text-gray-400" />
@@ -219,7 +217,7 @@ const SignUp = () => {
               placeholder="Phone Number"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+              className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -228,7 +226,7 @@ const SignUp = () => {
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+              className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -247,7 +245,7 @@ const SignUp = () => {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+              className="w-full px-6 py-4 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -260,7 +258,7 @@ const SignUp = () => {
               <select
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="w-full px-6 py-4 pr-14 rounded-2xl border-2 transition-all duration-300 text-lg 
+                className="w-full px-4 py-3 md:py-2.5 pr-12 rounded-2xl border-2 transition-all duration-300 text-base md:text-sm 
                                  focus:ring-4 focus:ring-blue-100 focus:border-blue-500 
                                  border-gray-200 hover:border-gray-300 bg-white
                                 font-inter placeholder-gray-400 focus:outline-none"
@@ -279,7 +277,7 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 sm:py-3.5 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 sm:py-3 md:py-2.5 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base md:text-sm"
               disabled={authing}
             >
               {authing ? (
@@ -312,9 +310,9 @@ const SignUp = () => {
             </button>
           </form>
 
-          {/* Mobile Sign In Link */}
+
           <div className="block md:hidden mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-sm italic">
               Already have an account?{" "}
               <button
                 onClick={() => navigate("/signin")}

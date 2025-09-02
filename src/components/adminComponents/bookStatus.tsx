@@ -197,6 +197,14 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
     resetForm();
   };
 
+   const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 h-screen overflow-y-auto">
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
@@ -294,7 +302,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
                       {book.publisher}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {book.date}
+                      {formatDate(book.date)}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       {book.isbn}

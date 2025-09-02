@@ -151,7 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ( {}) => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Available Books</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.availableBooks.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalBooks.toLocaleString()}</p>
                 </div>
               </div>
             </div>

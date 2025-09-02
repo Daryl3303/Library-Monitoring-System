@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Sidebar from "./adminComponents/sidebar";
 import Navbar from "./adminComponents/navbar";
 import Dashboard from "./adminComponents/dashboard";
-import Reservation from "./adminComponents/reservation";
+import ReservationStatus from "./adminComponents/reservationStatus";
 import BookStatus from "./adminComponents/bookStatus";
 import ReservationReport from "./adminComponents/reservationReport";
 import BookReports from "./adminComponents/bookReport";
@@ -117,7 +117,7 @@ const Admin: React.FC = () => {
     const pathMapping: { [key: string]: string } = {
       '/admin': '/',
       '/admin/dashboard': '/',
-      '/admin/reservation': '/reservation',
+      '/admin/reservation-status': '/reservationStatus',
       '/admin/book-status': '/bookStatus',
       '/admin/reservation-report': '/reservationReport',
       '/admin/book-report': '/bookReport',
@@ -149,7 +149,7 @@ const Admin: React.FC = () => {
 
       const urlMapping: { [key: string]: string } = {
         '/': '/admin/dashboard',
-        '/reservation': '/admin/reservation',
+        '/reservationStatus': '/admin/reservation-status',
         '/bookStatus': '/admin/book-status',
         '/reservationReport': '/admin/reservation-report',
         '/bookReport': '/admin/book-report',
@@ -209,9 +209,9 @@ const Admin: React.FC = () => {
               <Dashboard />
             </div>
           )}
-          {pageState === "/reservation" && (
+          {pageState === "/reservationStatus" && (
             <div className="animate-fade-in">
-              <Reservation />
+              <ReservationStatus />
             </div>
           )}
           {pageState === "/bookStatus" && (

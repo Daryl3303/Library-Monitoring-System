@@ -10,9 +10,10 @@ import {
   Hash,
   FileText,
 } from "lucide-react";
-import { collection, getDocs, getDoc, doc,addDoc } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, addDoc, setDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
 import ReserveModal from "../modals/reservationForm";
+import SuccessAnimation  from "../Success/successAnimation";
 
 export interface Book {
   id?: string;
@@ -39,6 +40,7 @@ interface User {
 }
 
 interface FormData {
+  id?: string;
   uid?: string;
   name: string;
   email: string;
@@ -49,8 +51,9 @@ interface FormData {
   bookTitle: string;
   bookAuthor: string;
   bookIsbn: string;
+  availableBooks: number;
   role: string;
-  quantity: number;
+  borrowQuantity: number;
   createdAt: string;
 }
 
@@ -66,13 +69,15 @@ interface Reservation {
   bookAuthor: string;
   bookIsbn: string;
   role: string;
-  quantity: number;
+  borrowQuantity: number;
   createdAt: string;
 }
 
 const ViewBooks: React.FC = () => {
+ const [reservationError, setReservationError] = useState<string>("");
+ const [showSuccess, setShowSuccess] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
-  const[reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -80,7 +85,7 @@ const ViewBooks: React.FC = () => {
   const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
   const [selectedGenre, setSelectedGenre] = useState<string>("All Book Genres");
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showReserveModal, setShowReserveModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -91,11 +96,11 @@ const ViewBooks: React.FC = () => {
     bookTitle: "",
     bookAuthor: "",
     bookIsbn: "",
+    availableBooks: 0,
     role: "",
-    quantity: 0,
+    borrowQuantity: 0,
     createdAt: "",
   });
-
 
   const fetchBooks = async () => {
     try {
@@ -119,13 +124,14 @@ const ViewBooks: React.FC = () => {
       setBooks(booksData);
 
       const uniqueGenres = Array.from(
-      new Set(
-        booksData.map((b) => b.genre?.trim().toLowerCase()).filter(Boolean)))
-                 .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
-                 .sort();
+        new Set(
+          booksData.map((b) => b.genre?.trim().toLowerCase()).filter(Boolean)
+        )
+      )
+        .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+        .sort();
 
-   
-    setGenres(["All Book Genres", ...uniqueGenres]);
+      setGenres(["All Book Genres", ...uniqueGenres]);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -202,29 +208,63 @@ const ViewBooks: React.FC = () => {
       bookTitle: book.title,
       bookAuthor: book.author,
       bookIsbn: book.isbn,
+      availableBooks: book.quantity,
       role: currentUser.role,
-      quantity: 0,
+      borrowQuantity: 0,
       createdAt: new Date().toISOString(),
     });
-    setShowAddModal(true);
+
+    setShowReserveModal(true);
   };
 
-
-
-
-    const handleAddReservation = async() => {
-    try {
-          const newReservations = { ...formData };
+  const handleAddReservation = async () => {
+     
     
-          const docRef = await addDoc(collection(db, "reservations"), newReservations);
-          setReservations([...reservations, { id: docRef.id, ...newReservations }]);
-          setShowAddModal(false);
-        } catch (error) {
-          console.error("Error Reservation:", error);
-          console.log(reservations)
-        }
-      };
+    try {
 
+         setReservationError("");
+
+   if (formData.borrowQuantity > formData.availableBooks) {
+   throw new Error (`Cannot reserve ${formData.borrowQuantity} books. Only ${formData.availableBooks} available.`);
+    return;
+  }
+
+  if (formData.borrowQuantity <= 0) {
+    throw new Error ("Please enter a valid quantity (minimum 1).");
+    return;
+  }
+  
+   if (!formData.address.trim()) {
+        throw new Error("Please enter your address.");
+      }
+    
+ 
+      const newReservations = { ...formData };
+
+      const docRef = await addDoc(
+        collection(db, "reservations"),
+        newReservations
+      );
+       const statusData = {
+      ...formData,
+      status: "Pending",
+    };
+
+    await setDoc(doc(db, "reservationStatus", docRef.id), statusData);
+      setReservations([...reservations, { id: docRef.id, ...newReservations }]);
+      setShowReserveModal(false);
+      setSelectedBook(null); 
+      setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 7000)
+    } catch (error) {
+      console.error("Error Reservation:", error);
+      if (error instanceof Error) {
+        setReservationError(error.message);
+      } else {
+        setReservationError("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
 
   const BookCard: React.FC<{ book: Book }> = ({ book }) => (
     <div
@@ -268,14 +308,21 @@ const ViewBooks: React.FC = () => {
     currentUser: User | null;
     onClose: () => void;
     onReserve: (book: Book, userId?: string) => void;
-  }> = ({ book, onClose, onReserve }) => (
+  }> = ({
+    book,
+    onClose,
+    onReserve,
+  }) => (
     <div
       className={`bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-2xl border border-slate-200/50 backdrop-blur-sm ${
-        isMobile ? "fixed inset-4 z-50 flex flex-col max-h-[calc(100vh-2rem)] overflow-hidden" 
+        isMobile
+          ? "fixed inset-4 z-50 flex flex-col max-h-[calc(100vh-2rem)] overflow-hidden"
           : "sticky top-4"
       }`}
     >
-      <div className={`${isMobile ? 'flex-1 overflow-y-auto' : ''} p-6 relative`}>
+      <div
+        className={`${isMobile ? "flex-1 overflow-y-auto" : ""} p-6 relative`}
+      >
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/50">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
             About This Book
@@ -386,18 +433,19 @@ const ViewBooks: React.FC = () => {
               </span>
             </div>
 
-            {book.quantity > 0 &&
-            <button
-              onClick={() => onReserve(book)}
-              disabled={book.quantity === 0}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform shadow-lg ${
-                book.quantity > 0
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl hover:scale-105 active:scale-95"
-                  : "bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed shadow-gray-200"
-              }`}>
-  Reserve Book
-            </button>
-}
+            {book.quantity > 0 && (
+              <button
+                onClick={() => onReserve(book)}
+                disabled={book.quantity === 0}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform shadow-lg ${
+                  book.quantity > 0
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl hover:scale-105 active:scale-95"
+                    : "bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed shadow-gray-200"
+                }`}
+              >
+                Reserve Book
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -405,131 +453,119 @@ const ViewBooks: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1 group">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors duration-200 pointer-events-none z-10">
-                <Search size={25} />
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1 group">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors duration-200 pointer-events-none z-10">
+                  <Search size={25} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search books by title or author..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-300/50 rounded-2xl shadow-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all duration-300 placeholder-slate-400 text-slate-700 hover:shadow-xl hover:border-slate-400/70 outline-none"
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Search books by title or author..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-300/50 rounded-2xl shadow-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all duration-300 placeholder-slate-400 text-slate-700 hover:shadow-xl hover:border-slate-400/70 outline-none"
-              />
-            </div>
 
-            <div className="relative group">
-              <div
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-purple-500 
-              transition-colors duration-200 z-10"
-              >
-                <Filter size={25} />
+              <div className="relative group">
+                <div
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-blue-500 
+                transition-colors duration-200 z-10"
+                >
+                  <Filter size={25} />
+                </div>
+                <select
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
+                  className="pl-12 pr-10 py-4 bg-white/80 backdrop-blur-sm border border-slate-300/50 rounded-2xl shadow-lg focus:ring-4
+                   focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all duration-300 placeholder-slate-400 text-slate-700 w-full 
+                   hover:shadow-xl hover:border-slate-400/70 cursor-pointer appearance-none bg-white outline-none"
+                >
+                  {genres.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept === "All" ? "All Departments" : dept}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                className="pl-12 pr-10 py-4 bg-white/80 backdrop-blur-sm border border-slate-300/50 rounded-2xl shadow-lg focus:ring-4
-                 focus:ring-purple-500/20 focus:border-purple-500 focus:bg-white transition-all duration-300 placeholder-slate-400 text-slate-700 w-full 
-                 hover:shadow-xl hover:border-slate-400/70 cursor-pointer appearance-none bg-white outline-none"
-              >
-                {genres.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept === "All" ? "All Departments" : dept}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
-        </div>
 
-        <div className={`flex gap-6 ${isMobile ? "flex-col" : "flex-row"}`}>
-          <div className={`${selectedBook && !isMobile ? "flex-1" : "w-full"}`}>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b-4 border-blue-600 inline-block pb-1">
-              Library Books
-            </h1>
+          <div className={`flex gap-6 ${isMobile ? "flex-col" : "flex-row"}`}>
+            <div className={`${selectedBook && !isMobile ? "flex-1" : "w-full"}`}>
+              <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b-4 border-blue-600 inline-block pb-1">
+                Library Books
+              </h1>
 
-             {!(selectedBook && isMobile) && (
-              <div
-                className={`grid gap-4 ${
-                  selectedBook && !isMobile
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                }`}
-              >
-              {filteredBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
+              {!(selectedBook && isMobile) && (
+                <div
+                  className={`grid gap-4 ${
+                    selectedBook && !isMobile
+                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  }`}
+                >
+                  {filteredBooks.map((book) => (
+                    <BookCard key={book.id} book={book} />
+                  ))}
+                </div>
+              )}
+
+              {filteredBooks.length === 0 && !(selectedBook && isMobile) && (
+                <div className="text-center py-12">
+                  <Book className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">No books found</p>
+                </div>
+              )}
             </div>
-             )}
 
-            {filteredBooks.length === 0 && !(selectedBook && isMobile) && (
-              <div className="text-center py-12">
-                <Book className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No books found</p>
+            {selectedBook && !isMobile && (
+              <div className="w-80 flex-shrink-0">
+                <BookOverview
+                  book={selectedBook}
+                  currentUser={currentUser}
+                  onClose={handleCloseOverview}
+                  onReserve={handleReserve}
+                />
               </div>
             )}
           </div>
 
-          {selectedBook && !isMobile && (
-            <div className="w-80 flex-shrink-0">
+          {selectedBook && isMobile && (
+            <>
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 flex-shrink-0 z-40"
+                onClick={handleCloseOverview}
+              />
               <BookOverview
                 book={selectedBook}
                 currentUser={currentUser}
                 onClose={handleCloseOverview}
                 onReserve={handleReserve}
               />
-
-              <ReserveModal
-                book={selectedBook}
-                currentUser={currentUser}
-                isOpen={showAddModal} 
-                formData={formData}
-                setFormData={setFormData}
-                onSubmit={() => {
-                   handleAddReservation();
-                  handleCloseOverview();
-                }}
-                onClose={() => setShowAddModal(false)}
-                onReserve={handleReserve}
-              />
-            </div>
+            </>
           )}
         </div>
-
-        {selectedBook && isMobile && (
-          <>
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex-shrink-0 z-40"
-              onClick={handleCloseOverview}
-            />
-            <BookOverview
-              book={selectedBook}
-              currentUser={currentUser}
-              onClose={handleCloseOverview}
-              onReserve={handleReserve}
-            />
-
-            <ReserveModal
-                book={selectedBook}
-                currentUser={currentUser}
-                isOpen={showAddModal} 
-                formData={formData}
-                setFormData={setFormData}
-                onSubmit={() => {
-                  handleAddReservation();
-                  handleCloseOverview();
-                }}
-                onClose={() => setShowAddModal(false) }
-                onReserve={handleReserve}
-              />
-          </>
-        )}
       </div>
-    </div>
+
+      {showReserveModal && (
+        <ReserveModal
+          isOpen={showReserveModal}
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleAddReservation}
+          onClose={() => setShowReserveModal(false)}
+          book={selectedBook || undefined}
+          errorMessage={reservationError}
+          setErrorMessage={setReservationError}
+        />
+      )}
+      <SuccessAnimation isVisible={showSuccess} />
+    </>
   );
 };
 

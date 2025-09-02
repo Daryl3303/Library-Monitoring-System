@@ -92,7 +92,7 @@ const SignIn = () => {
             : "scale-95 opacity-0 translate-y-8"
         }`}
       >
-        {/* Mobile Header - Only visible on small screens */}
+  
         <div className="block md:hidden w-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white p-6 text-center">
           <h2 className="text-2xl sm:text-3xl italic font-medium font-serif text-white tracking-wide mb-2 leading-tight">
             Welcome!
@@ -103,7 +103,7 @@ const SignIn = () => {
           </p>
         </div>
 
-        {/* Message Side - Hidden on mobile, shown on md+ */}
+    
         <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center items-center p-6 lg:p-8 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white transform transition-all duration-700 ease-out">
           <div className="transform transition-all duration-500 hover:scale-105">
             <h2 className="text-3xl lg:text-4xl xl:text-5xl italic font-medium font-serif text-white tracking-wide text-center mb-4 leading-tight">
@@ -122,9 +122,9 @@ const SignIn = () => {
           </div>
         </div>
 
-        {/* Form Side */}
+
         <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center items-center bg-white transform transition-all duration-700 ease-out">
-          {/* Logo and Title */}
+  
           <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
             <img
               src="/logo.png"
@@ -136,14 +136,13 @@ const SignIn = () => {
             </h2>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="w-full max-w-sm mb-4 p-3 sm:p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg transform transition-all duration-300 animate-fade-in font-inter">
               <p className="font-medium text-sm sm:text-base">{error}</p>
             </div>
           )}
 
-          {/* Form */}
+          
           <form
             className="w-full max-w-sm flex flex-col space-y-4 sm:space-y-5 transform transition-all duration-500"
             onSubmit={(e) => {
@@ -214,15 +213,14 @@ const SignIn = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing In...
+                  Logging in...
                 </span>
               ) : (
-                "Sign In"
+                "Log In"
               )}
             </button>
           </form>
 
-          {/* Divider */}
           <div className="w-full flex max-w-sm items-center justify-center relative py-4 sm:py-6 mt-3 sm:mt-4 mb-3 sm:mb-4">
             <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
             <p className="text-xs sm:text-sm absolute text-blue-600 bg-white px-3 sm:px-4 font-semibold font-inter tracking-wide">
@@ -230,7 +228,7 @@ const SignIn = () => {
             </p>
           </div>
 
-          {/* Google Sign In */}
+  
           <div className="w-full max-w-sm flex flex-col space-y-4">
             <button
               className="w-full flex items-center justify-center bg-white border-2 border-blue-600 text-blue-600 rounded-full px-4 sm:px-6 py-3 sm:py-3.5 hover:bg-blue-50 hover:scale-105 transition-all duration-300 transform hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base"
@@ -259,21 +257,20 @@ const SignIn = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing In...
+                  Logging in...
                 </span>
               ) : (
                 <>
-                  <span className="hidden xs:inline">Sign In with Google</span>
-                  <span className="xs:hidden">Google</span>
+                  <span>Continue with Google</span>
                   <FcGoogle className="ml-2 text-lg sm:text-xl" />
                 </>
               )}
             </button>
           </div>
 
-          {/* Mobile Sign Up Link */}
+     
           <div className="block md:hidden mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-sm italic">
               Don't have an account?{" "}
               <button
                 onClick={() => navigate("/signup")}

@@ -83,7 +83,6 @@ export default function WelcomePage({onViewBooks}: WelcomePageProps) {
             </div>
           ) : (
             <div className="relative">
-              {/* Desktop */}
               <div className="hidden md:block">
                 <div
                   className="flex justify-start items-center space-x-4 pb-4 px-4">
@@ -94,7 +93,7 @@ export default function WelcomePage({onViewBooks}: WelcomePageProps) {
                       style={{ scrollSnapAlign: "start" }}
                     >
                       <div className="flex flex-col items-center justify-center bg-white rounded-xl shadow-lg p-4 h-full">
-                        <div className="aspect-[3/4] mb-3 rounded-lg overflow-hidden">
+                        <div className="w-50 h-60 mb-3 rounded-lg overflow-hidden">
                           <img
                             src={book.coverPage}
                             alt={book.title}
@@ -115,7 +114,7 @@ export default function WelcomePage({onViewBooks}: WelcomePageProps) {
                 </div>
               </div>
 
-              {/* Mobile */}
+      
               <div className="md:hidden">
                 <div className="flex justify-start items-center overflow-x-auto scrollbar-hide space-x-4 pb-4 px-4">
                   {books.map((book) => (
@@ -141,7 +140,6 @@ export default function WelcomePage({onViewBooks}: WelcomePageProps) {
           )}
         </div>
 
-        {/* View Books Button */}
         <div className="text-center">
           <button
             onClick={handleViewBooks}
