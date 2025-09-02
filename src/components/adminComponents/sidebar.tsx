@@ -36,19 +36,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
     onPageChange(path);
   };
 
-  // Helper function to check if current item is active
+
   const isActive = (path: string) => currentPage === path;
 
   return (
     <div className="w-64 h-screen overflow-y-auto bg-gradient-to-b from-blue-600 to-blue-700 text-white flex flex-col">
-      {/* Navbar Space */}
+
       <div className="h-[20px] border-b border-blue-500/30">
-        {/* Space reserved for navbar */}
+    
       </div>
 
-      {/* Main Navigation */}
+
       <div className="flex-1 p-4 space-y-2">
-        {/* Dashboard */}
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
@@ -59,17 +58,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
             <LayoutDashboard className="w-6 h-6" />
             <span className="font-medium text-lg">Dashboard</span>
           </div>
-          
-          {/* Dashboard Sub-items */}
+
           <div className="ml-8 mt-2 space-y-1">
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                isActive('/reservation') ? 'bg-white/20' : 'hover:bg-white/10'
+                isActive('/reservationStatus') ? 'bg-white/20' : 'hover:bg-white/10'
               }`}
-              onClick={() => handleItemClick('/reservation')}
+              onClick={() => handleItemClick('/reservationStatus')}
             >
               <Calendar className="w-5 h-5" />
-              <span>Reservations</span>
+              <span>Reservation Status</span>
             </div>
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${

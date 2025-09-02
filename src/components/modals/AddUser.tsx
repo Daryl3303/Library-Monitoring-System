@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 interface FormData {
@@ -41,15 +41,86 @@ function UserFormModal({
   onSubmit,
   onClose,
 }: UserFormModalProps) {
-  if (!isOpen) return null;
+  
 
   const [showPassword, setShowPassword] = useState(false);
 
+    useEffect(() => {
+      if (isOpen) {
+        const originalOverflow = document.body.style.overflow;
+        const originalPosition = document.body.style.position;
+  
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+        document.body.style.height = "100%";
+  
+        return () => {
+          document.body.style.overflow = originalOverflow;
+          document.body.style.position = originalPosition;
+          document.body.style.width = "";
+          document.body.style.height = "";
+        };
+      }
+    }, [isOpen]);
+
+    useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-blue-200">
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-blue-300 bg-blue-50 rounded-t-2xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+     onClick={handleBackdropClick}
+      style={{
+        zIndex: 9999,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        margin: 0,
+      }}>
+      
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl border border-blue-200 flex flex-col mx-auto"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxHeight: "85vh",
+          position: "relative",
+          zIndex: 10000,
+          transform: "none",
+          margin: "0 auto",
+          top: "-3%",
+          right: "9%",
+        }}
+      >
+     
+        <div className="flex justify-between items-center p-6 border-b border-blue-300 bg-blue-50 rounded-t-2xl flex-shrink-0">
           <h3 className="text-xl font-bold text-blue-800">
             {isEdit ? "Edit User" : "Add New User"}
           </h3>
@@ -67,7 +138,9 @@ function UserFormModal({
           </div>
         )}
 
-        {/* Form */}
+
+        <div className="flex-1 overflow-y-auto">
+
         <form
           className="p-6"
           onSubmit={(e) => {
@@ -93,7 +166,6 @@ function UserFormModal({
               />
             </div>
 
-            {/* Email - Different behavior for edit vs add */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
                 Email
@@ -116,7 +188,6 @@ function UserFormModal({
               )}
             </div>
 
-            {/* Password - Different behavior for edit vs add */}
             {!isEdit && (
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
@@ -242,24 +313,31 @@ function UserFormModal({
               </div>
             )}
           </div>
+          
 
           {/* Buttons */}
-          <div className="flex gap-3 mt-8">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg shadow-md transition"
-            >
-              {isEdit ? "Update User" : "Add User"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
+          
         </form>
+        </div>
+        <div className="flex gap-3 p-6 pt-4 border-t border-gray-200 flex-shrink-0">
+          <button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              onSubmit();
+            }}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg shadow-md transition-colors duration-200"
+          >
+            {isEdit ? "Update User" : "Add User"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          </div>
       </div>
     </div>
   );

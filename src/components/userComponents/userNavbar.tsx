@@ -17,7 +17,17 @@ interface dropdownMenu {
   path: string;
 }
 
-const UserNavbar: React.FC<dropdownUserProps> = ({ onChangeState, onLogoutClick }) => {
+interface welcomePageProps {
+  onWelcomePage?: () => void;
+}
+
+type UserNavbarProps = dropdownUserProps & welcomePageProps;
+
+const UserNavbar: React.FC<UserNavbarProps> = ({
+  onChangeState,
+  onLogoutClick,
+  onWelcomePage,
+}) => {
   const dropdownMenus: dropdownMenu[] = [
     {
       icon: <TiHome size={20} />,
@@ -58,42 +68,46 @@ const UserNavbar: React.FC<dropdownUserProps> = ({ onChangeState, onLogoutClick 
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
 
-const fetchUsers = async () => {
-  try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const userDoc = querySnapshot.docs.find(
+        (doc) => doc.id === currentUser.uid
+      );
 
-    const querySnapshot = await getDocs(collection(db, "users"));
-    const userDoc = querySnapshot.docs.find(doc => doc.id === currentUser.uid);
-
-    if (userDoc) {
-      const data = userDoc.data();
-      setUserName(data.name || "");
-      setUserEmail(data.email || "");
-      setUserRole(data.role || "");
+      if (userDoc) {
+        const data = userDoc.data();
+        setUserName(data.name || "");
+        setUserEmail(data.email || "");
+        setUserRole(data.role || "");
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error);
     }
-  } catch (error) {
-    console.error("Error fetching current user:", error);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const  handleWelcomePage = () => {
+    onWelcomePage?.();
   }
-};
-
-useEffect(() => {
-  fetchUsers();
-}, []);
-
-
-
   return (
     <>
-      {/* Navbar */}
       <nav className="bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg relative h-[80px] md:h-[80px] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
         <div className="relative z-10 w-full px-4 md:px-6 flex items-center justify-between">
-         
-          <div className="flex items-center space-x-3">
-            <img src="/logo.png" className="w-[50px] h-[50px] md:w-[70px] md:h-[70px]" />
+          <div className="flex items-center space-x-3 hover:cursor-pointer hover:scale-[1.02] transition-all duration-200"
+          onClick={handleWelcomePage}>
+            <img
+              src="/logo.png"
+              className="w-[50px] h-[50px] md:w-[70px] md:h-[70px]"
+            />
             <h1 className="hidden md:block text-white text-lg md:text-2xl font-semibold tracking-tight drop-shadow-sm">
               Smart Library: Online Book Reservation and Monitoring System
             </h1>
@@ -102,7 +116,6 @@ useEffect(() => {
             </h1>
           </div>
 
-     
           <div className="hidden md:flex items-center space-x-4">
             <div className="relative" ref={dropdownRef}>
               <button
@@ -113,7 +126,9 @@ useEffect(() => {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="text-white text-sm font-medium">{userName}</div>
+                  <div className="text-white text-sm font-medium">
+                    {userName}
+                  </div>
                   <div className="text-white/80 text-xs">{userRole}</div>
                 </div>
                 <ChevronDown
@@ -125,7 +140,6 @@ useEffect(() => {
             </div>
           </div>
 
-  
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -137,7 +151,6 @@ useEffect(() => {
         </div>
       </nav>
 
-
       {isDropdownOpen && (
         <div className="absolute right-6 top-[75px] w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
@@ -147,7 +160,10 @@ useEffect(() => {
               </div>
               <div className="min-w-0">
                 <div className="font-semibold text-gray-900">{userName}</div>
-                <div className="text-sm text-gray-600 truncate max-w-[180px]" title={userEmail}>
+                <div
+                  className="text-sm text-gray-600 truncate max-w-[180px]"
+                  title={userEmail}
+                >
                   {userEmail}
                 </div>
               </div>
@@ -180,7 +196,6 @@ useEffect(() => {
         </div>
       )}
 
-     
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-[60px] right-0 w-60 max-w-[calc(100vw-32px)] bg-white shadow-lg rounded-b-xl z-50 max-h-[calc(100vh-60px)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-gray-100">
@@ -190,7 +205,9 @@ useEffect(() => {
               </div>
               <div className="min-w-0">
                 <div className="font-semibold text-gray-900">{userName}</div>
-                <div className="text-sm text-gray-600 truncate">{userEmail}</div>
+                <div className="text-sm text-gray-600 truncate">
+                  {userEmail}
+                </div>
               </div>
             </div>
           </div>

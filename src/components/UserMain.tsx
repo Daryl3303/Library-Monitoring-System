@@ -167,6 +167,7 @@ const UserMain: React.FC = () => {
             }
           }}
           onLogoutClick={handleLogoutClick}
+          onWelcomePage={() => handlePageChange("/") }
         />
       </div>
   
