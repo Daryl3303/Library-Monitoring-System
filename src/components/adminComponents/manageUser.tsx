@@ -43,9 +43,9 @@ interface FormData {
 const departments = [
   "All Departments",
   "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration ",
+  "Bachelor of Science in Business Administration",
   "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education ",
+  "Bachelor of Science in Elementary Education",
   "Bachelor of Science in Secondary Education",
 ];
 
@@ -240,7 +240,7 @@ export default function LibraryUserTable() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
+     
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
@@ -254,13 +254,11 @@ export default function LibraryUserTable() {
           </div>
         </div>
 
-        {/* User Management Section */}
+
         <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-              {/* Left side - Search + Department Filter */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {/* Search Bar */}
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -272,7 +270,6 @@ export default function LibraryUserTable() {
                   />
                 </div>
 
-                {/* Department Filter */}
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -286,7 +283,6 @@ export default function LibraryUserTable() {
                 </select>
               </div>
 
-              {/* Right side - Add User Button */}
               <button
                 onClick={openAddModal}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md flex items-center justify-center hover:scale-105 duration-300 gap-2 transition-colors w-full sm:w-auto"
@@ -297,7 +293,7 @@ export default function LibraryUserTable() {
             </div>
           </div>
 
-          {/* Table */}
+ 
           <div className="overflow-x-auto">
             <table className="w-full text-sm sm:text-base">
               <thead className="bg-gray-50 border-b border-blue-700">
@@ -397,7 +393,7 @@ export default function LibraryUserTable() {
         </div>
       </div>
 
-      {/* Modals remain unchanged */}
+   
       <UserFormModal
         isOpen={showAddModal}
         isEdit={false}

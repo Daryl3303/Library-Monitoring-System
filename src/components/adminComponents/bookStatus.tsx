@@ -347,7 +347,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
         </div>
       </div>
 
-      {/* Modals */}
+   
       <AddBookModal
         isOpen={showAddModal}
         isEdit={false}

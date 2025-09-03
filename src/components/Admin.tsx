@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import Sidebar from "./adminComponents/sidebar";
 import Navbar from "./adminComponents/navbar";
 import Dashboard from "./adminComponents/dashboard";
-import ReservationStatus from "./adminComponents/reservationStatus";
+import Reservations from "./adminComponents/resevations";
 import BookStatus from "./adminComponents/bookStatus";
 import ReservationReport from "./adminComponents/reservationReport";
 import BookReports from "./adminComponents/bookReport";
-import ManageReservation from "./adminComponents/manageReservation";
+import ReservationManagement from "./adminComponents/manageReservation";
 import ManageUser from "./adminComponents/manageUser";
 import UserProfile from "./adminComponents/AdminProfile";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,7 +25,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Close modal on outside click
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -117,11 +117,11 @@ const Admin: React.FC = () => {
     const pathMapping: { [key: string]: string } = {
       '/admin': '/',
       '/admin/dashboard': '/',
-      '/admin/reservation-status': '/reservationStatus',
+      '/admin/reservations': '/reservations',
       '/admin/book-status': '/bookStatus',
       '/admin/reservation-report': '/reservationReport',
       '/admin/book-report': '/bookReport',
-      '/admin/manage-reservation': '/manageReservation',
+      '/admin/reservation-management': '/reservationManagement',
       '/admin/manage-user': '/manageUser',
       '/admin/user-profile': '/userProfile',
     };
@@ -149,11 +149,11 @@ const Admin: React.FC = () => {
 
       const urlMapping: { [key: string]: string } = {
         '/': '/admin/dashboard',
-        '/reservationStatus': '/admin/reservation-status',
+        '/reservations': '/admin/reservations',
         '/bookStatus': '/admin/book-status',
         '/reservationReport': '/admin/reservation-report',
         '/bookReport': '/admin/book-report',
-        '/manageReservation': '/admin/manage-reservation',
+        '/reservationManagement': '/admin/reservation-management',
         '/manageUser': '/admin/manage-user',
         '/userProfile': '/admin/user-profile',
       };
@@ -209,9 +209,9 @@ const Admin: React.FC = () => {
               <Dashboard />
             </div>
           )}
-          {pageState === "/reservationStatus" && (
+          {pageState === "/reservations" && (
             <div className="animate-fade-in">
-              <ReservationStatus />
+              <Reservations />
             </div>
           )}
           {pageState === "/bookStatus" && (
@@ -229,9 +229,9 @@ const Admin: React.FC = () => {
               <BookReports />
             </div>
           )}
-          {pageState === "/manageReservation" && (
+          {pageState === "/reservationManagement" && (
             <div className="animate-fade-in">
-              <ManageReservation />
+              <ReservationManagement />
             </div>
           )}
           {pageState === "/manageUser" && (
