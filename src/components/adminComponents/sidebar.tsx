@@ -62,12 +62,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
           <div className="ml-8 mt-2 space-y-1">
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                isActive('/reservationStatus') ? 'bg-white/20' : 'hover:bg-white/10'
+                isActive('/reservations') ? 'bg-white/20' : 'hover:bg-white/10'
               }`}
-              onClick={() => handleItemClick('/reservationStatus')}
+              onClick={() => handleItemClick('/reservations')}
             >
               <Calendar className="w-5 h-5" />
-              <span>Reservation Status</span>
+              <span>Reservations</span>
             </div>
             <div 
               className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
@@ -96,8 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
               <ChevronRight className="w-5 h-5" />
             }
           </div>
-          
-          {/* Reports Sub-items */}
+
           {expandedSections.reports && (
             <div className="ml-8 mt-2 space-y-1">
               <div 
@@ -126,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
         <div className="mb-4">
           <div 
             className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-              (isActive('/manageReservation') || isActive('/manageUser')) ? 'bg-white/20' : 'hover:bg-white/10'
+              (isActive('/reservationManagement') || isActive('/manageUser')) ? 'bg-white/20' : 'hover:bg-white/10'
             }`}
             onClick={() => toggleSection('maintenance')}
           >
@@ -143,9 +142,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
             <div className="ml-8 mt-2 space-y-1">
               <div 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors cursor-pointer text-base ${
-                  isActive('/manageReservation') ? 'bg-white/20' : 'hover:bg-white/10'
+                  isActive('/reservationManagement') ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
-                onClick={() => handleItemClick('/manageReservation')}
+                onClick={() => handleItemClick('/reservationManagement')}
               >
                 <Calendar className="w-5 h-5" />
                 <span>Manage Reservations</span>

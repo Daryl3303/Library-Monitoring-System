@@ -24,9 +24,9 @@ interface UserFormModalProps {
 
 const departments = [
   "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration ",
+  "Bachelor of Science in Business Administration",
   "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education ",
+  "Bachelor of Science in Elementary Education",
   "Bachelor of Science in Secondary Education",
 ];
 
@@ -222,7 +222,7 @@ function UserFormModal({
             </div>
               )}
 
-            {/* Phone Number */}
+  
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
                 Phone Number
@@ -239,7 +239,6 @@ function UserFormModal({
               />
             </div>
 
-            {/* Department */}
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
                 Department
@@ -263,7 +262,7 @@ function UserFormModal({
               </select>
             </div>
 
-            {/* Role */}
+   
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
                 Role
@@ -315,7 +314,7 @@ function UserFormModal({
           </div>
           
 
-          {/* Buttons */}
+     
           
         </form>
         </div>

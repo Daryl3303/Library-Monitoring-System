@@ -29,7 +29,7 @@ const UserProfile: React.FC = () => {
     "Bachelor of Science in Secondary Education",
   ];
 
-  // Mock data for demonstration
+
   useEffect(() => {
    fetchUserData();
   }, []);

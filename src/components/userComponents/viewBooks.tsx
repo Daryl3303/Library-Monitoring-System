@@ -55,6 +55,9 @@ interface FormData {
   role: string;
   borrowQuantity: number;
   createdAt: string;
+  returnDate: string;
+  returnedAt: string;
+
 }
 
 interface Reservation {
@@ -68,9 +71,13 @@ interface Reservation {
   bookTitle: string;
   bookAuthor: string;
   bookIsbn: string;
+   availableBooks: number;
   role: string;
   borrowQuantity: number;
   createdAt: string;
+  returnDate: string;
+  returnedAt: string;
+
 }
 
 const ViewBooks: React.FC = () => {
@@ -100,6 +107,8 @@ const ViewBooks: React.FC = () => {
     role: "",
     borrowQuantity: 0,
     createdAt: "",
+    returnDate: "",
+    returnedAt: "",
   });
 
   const fetchBooks = async () => {
@@ -197,6 +206,11 @@ const ViewBooks: React.FC = () => {
   const handleReserve = (book: Book) => {
     if (!currentUser) return;
     setSelectedBook(book);
+
+     const createdAt = new Date();
+  const returnDate = new Date(createdAt);
+  returnDate.setDate(createdAt.getDate() + 7);
+
     setFormData({
       uid: currentUser.uid,
       name: currentUser.name,
@@ -211,15 +225,15 @@ const ViewBooks: React.FC = () => {
       availableBooks: book.quantity,
       role: currentUser.role,
       borrowQuantity: 0,
-      createdAt: new Date().toISOString(),
+      createdAt: createdAt.toISOString(),
+      returnDate: returnDate.toISOString(),
+      returnedAt: "",
     });
 
     setShowReserveModal(true);
   };
 
   const handleAddReservation = async () => {
-     
-    
     try {
 
          setReservationError("");
@@ -296,7 +310,7 @@ const ViewBooks: React.FC = () => {
                 : "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border border-red-200"
             }`}
           >
-            {book.quantity > 0 ? "Available" : "Unavailable"}
+            {book.quantity > 0 ? "Available" : "Not Available"}
           </span>
         </div>
       </div>

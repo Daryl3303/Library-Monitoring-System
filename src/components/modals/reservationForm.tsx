@@ -19,6 +19,8 @@ interface FormData {
   role: string;
   borrowQuantity: number;
   createdAt: string;
+  returnDate: string;
+  returnedAt: string;
 }
 
 interface ReserveModalProps {
@@ -276,7 +278,7 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
               
             </div>
 
-            {/* Book Information */}
+          
             <div className="mb-6">
               <h4 className="text-lg font-semibold text-blue-800 mb-3 border-b border-blue-200 pb-1">
                 Book Information

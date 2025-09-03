@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Search, BookOpenCheck} from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
+import { Search, BookOpenCheck, X, Check } from "lucide-react";
+import { collection, getDocs, getDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
-interface ReservationStatus {
+interface Reservation {
   id?: string;
   uid?: string;
   name: string;
@@ -19,26 +19,26 @@ interface ReservationStatus {
   role: string;
   borrowQuantity: number;
   createdAt: string;
-  status: string;
 }
 
-const ReservationStatus = () => {
+
+const Reservations = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [reservationStatus, setReservationStatus] = useState<ReservationStatus[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [selectedDepartment, setSelectedDepartment] =
     useState("All Departments");
-  const [selectedDateFilter, setSelectedDateFilter] = useState("All Time");
+
 
   const fetchReservations = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "reservationStatus"));
-      const reservationStatusData: ReservationStatus[] = querySnapshot.docs.map(
+      const querySnapshot = await getDocs(collection(db, "reservations"));
+      const reservationsData: Reservation[] = querySnapshot.docs.map(
         (document) => ({
           id: document.id,
-          ...(document.data() as ReservationStatus),
+          ...(document.data() as Reservation),
         })
       );
-      setReservationStatus(reservationStatusData);
+      setReservations(reservationsData);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -50,61 +50,76 @@ const ReservationStatus = () => {
 
   const departments = [
     "All Departments",
-    ...new Set(reservationStatus.map((res) => res.department)),
+    ...new Set(reservations.map((res) => res.department)),
   ];
 
-  const dateFilters = [
-    "All Time",
-    "Last 7 Days",
-    "Last 30 Days",
-    "This Month",
-    "Last Month",
-  ] as const;
+ 
 
-  type DateFilter =
-    | "All Time"
-    | "Last 7 Days"
-    | "Last 30 Days"
-    | "This Month"
-    | "Last Month";
+ const handleConfirm = async (reservationId: string) => {
+    try {
+      
+      const reservationSnap = await getDoc(doc(db, "reservations", reservationId));
+      if (!reservationSnap.exists()) {
+        throw new Error("Reservation not found");
+      }
 
-  const isDateInRange = (dateString: string, filter: DateFilter): boolean => {
-    if (filter === "All Time") return true;
+      const reservationData = reservationSnap.data() as Reservation;
+      const borrowQuantity = reservationData.borrowQuantity;
+      const bookIsbn = reservationData.bookIsbn;
 
-    const date = new Date(dateString);
-    const now = new Date();
+      const booksSnapshot = await getDocs(collection(db, "books"));
+      const bookDoc = booksSnapshot.docs.find((doc) => doc.data().isbn === bookIsbn);
+
+      if (!bookDoc) {
+        throw new Error("Book not found");
+      }
+
+      const bookData = bookDoc.data();
+      const newQuantity = (bookData.quantity || 0) - borrowQuantity;
+
+     
+
+      await updateDoc(doc(db, "books", bookDoc.id), { quantity: newQuantity });
+
+      
+      const returnDate = new Date();
+      returnDate.setDate(returnDate.getDate() + 7);
 
    
-    const dateOnly = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    );
-    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const daysDiff =
-      (nowOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24);
+      await updateDoc(doc(db, "reservationStatus", reservationId), {
+        status: "Confirmed",
+      });
 
-    switch (filter) {
-      case "Last 7 Days":
-        return daysDiff >= 0 && daysDiff <= 7;
-      case "Last 30 Days":
-        return daysDiff >= 0 && daysDiff <= 30;
-      case "This Month":
-        return (
-          date.getMonth() === now.getMonth() &&
-          date.getFullYear() === now.getFullYear()
-        );
-      case "Last Month":
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
-        return (
-          date.getMonth() === lastMonth.getMonth() &&
-          date.getFullYear() === lastMonth.getFullYear()
-        );
-      default:
-        return true;
+      await handleDeleteReservation(reservationId);
+
+      console.log("Reservation confirmed successfully!");
+    } catch (error) {
+      console.error("Error confirming reservation:", error);
+      alert("Error confirming reservation. Please try again.");
     }
   };
 
+  const handleDecline = async (reservationId: string) => {
+    try {
+    await updateDoc(doc(db, "reservationStatus", reservationId), {
+      status: "Declined",
+    });
+      await handleDeleteReservation(reservationId);
+    }catch(error){
+      console.error("Error updating status:", error);
+    }
+  };
+
+  const handleDeleteReservation = async (reservationId: string) => {
+        try {
+          await deleteDoc(doc(db, "reservations", reservationId));
+          setReservations(reservations.filter((res) => res.id !== reservationId));
+        } catch (error) {
+          console.error("Error deleting book:", error);
+        }
+      }
+
+  
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -115,19 +130,15 @@ const ReservationStatus = () => {
   };
 
 
-  const filteredReservationStatus = reservationStatus.filter((res) => {
+  const filteredReservations = reservations.filter((res) => {
     const matchesSearch = res.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesDepartment =
       selectedDepartment === "All Departments" ||
       res.department === selectedDepartment;
-    const matchesDate = isDateInRange(
-      res.createdAt,
-      selectedDateFilter as DateFilter
-    );
-
-    return matchesSearch && matchesDepartment && matchesDate;
+    
+    return matchesSearch && matchesDepartment;
   });
 
   return (
@@ -141,7 +152,7 @@ const ReservationStatus = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
-                Reservation
+                Pending Resevation
               </h1>
             </div>
           </div>
@@ -176,19 +187,6 @@ const ReservationStatus = () => {
                     </option>
                   ))}
                 </select>
-
-           
-                <select
-                  value={selectedDateFilter}
-                  onChange={(e) => setSelectedDateFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-                >
-                  {dateFilters.map((filter) => (
-                    <option key={filter} value={filter}>
-                      {filter}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>
@@ -211,7 +209,7 @@ const ReservationStatus = () => {
                     "Borrow Quantity",
                     "Created At",
                     "Role",
-                    "Status",
+                    "Actions",
                   ].map((header) => (
                     <th
                       key={header}
@@ -223,7 +221,7 @@ const ReservationStatus = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-blue-200">
-                {filteredReservationStatus
+                {filteredReservations
                   .slice()
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((res) => (
@@ -295,24 +293,29 @@ const ReservationStatus = () => {
                         </span>
                       </td>
                       <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                        <span
-                          className={`px-3 py-1 text-sm font-medium rounded-full ${
-                            res.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : res.status === "Confirmed"
-                              ? "bg-green-300 text-green-800"
-                              : "bg-red-300 text-red-800"
-                          }`}
-                        >
-                          {res.status}
-                        </span>
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => handleConfirm(res.id!)}
+                            className="bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 p-2 rounded-lg transition-colors hover:scale-110 duration-200"
+                            title="Confirm"
+                          >
+                            <Check className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDecline(res.id!)}
+                            className="bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 p-2 rounded-lg transition-colors hover:scale-110 duration-200"
+                            title="Decline"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
               </tbody>
             </table>
 
-            {filteredReservationStatus.length === 0 && (
+            {filteredReservations.length === 0 && (
               <div className="text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base">
                 No pending registrations found matching your criteria.
               </div>
@@ -324,4 +327,4 @@ const ReservationStatus = () => {
   );
 };
 
-export default ReservationStatus;
+export default Reservations;

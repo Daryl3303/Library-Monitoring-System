@@ -75,13 +75,11 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
 
   return (
     <>
-      {/* Main Navbar */}
-      <nav className="bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg relative overflow-visible h-[80px]">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
+      <nav className="bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg relative overflow-visible h-[80px]">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
         <div className="relative z-10 px-6 py-3 flex items-center justify-between h-full">
-          {/* Logo and Title */}
+      
           <div className="flex items-center space-x-4">
             <img
               src="/logo.png"
@@ -92,9 +90,8 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
             </h1>
           </div>
 
-          {/* Right Side Actions */}
+ 
           <div className="flex items-center space-x-4">
-            {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={handleDropdownToggle}
@@ -120,7 +117,6 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
         </div>
       </nav>
 
-      {/* Dropdown Menu */}
       {isDropdownOpen && (
         <div
           className="fixed top-[70px] right-6 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 transform transition-all duration-200 ease-out"

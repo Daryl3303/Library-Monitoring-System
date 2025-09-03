@@ -11,9 +11,9 @@ import { Eye, EyeOff } from "lucide-react";
 
 const departments = [
   "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration ",
+  "Bachelor of Science in Business Administration",
   "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education ",
+  "Bachelor of Science in Elementary Education",
   "Bachelor of Science in Secondary Education",
 ];
 
