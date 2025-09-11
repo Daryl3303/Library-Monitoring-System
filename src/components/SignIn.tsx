@@ -113,12 +113,6 @@ const SignIn = () => {
               Online Library Reservation of LCC-Isabela Library making it easy
               for students to reserve and access books anytime, anywhere.
             </p>
-            <button
-              onClick={() => navigate("/signup")}
-              className="px-6 lg:px-8 py-2.5 lg:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-inter tracking-wide text-sm lg:text-base"
-            >
-              Register
-            </button>
           </div>
         </div>
 
@@ -266,19 +260,6 @@ const SignIn = () => {
                 </>
               )}
             </button>
-          </div>
-
-     
-          <div className="block md:hidden mt-6 text-center">
-            <p className="text-gray-600 text-sm italic">
-              Don't have an account?{" "}
-              <button
-                onClick={() => navigate("/signup")}
-                className="text-blue-600 font-semibold hover:underline"
-              >
-                Register
-              </button>
-            </p>
           </div>
         </div>
       </div>

@@ -23,7 +23,6 @@ interface ReservationCount {
   studentYear3: number;
   studentYear4: number;
   teacher: number;
-  admin: number;
   total: number;
 }
 
@@ -53,13 +52,13 @@ type DateFilter =
   | "This Month"
   | "Last Month";
 
-export default function ReservationReport() {
+const ReservationReport = () => {
   const [reservations, setReservations] = useState<ReservationData[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedDateFilter, setSelectedDateFilter] = useState<DateFilter>("All Time");
   const [reservationCounts, setReservationCounts] = useState<ReservationCount[]>([]);
 
-  // Use the same date filtering logic as ManageReservation
+  
   const isDateInRange = (dateString: string, filter: DateFilter): boolean => {
     if (filter === "All Time") return true;
 
@@ -130,14 +129,11 @@ export default function ReservationReport() {
         studentYear3: 0,
         studentYear4: 0,
         teacher: 0,
-        admin: 0,
         total: 0,
       };
     });
 
-    // Filter reservations based on date filter before processing
     const filteredReservations = reservations.filter((reservation) => {
-      // Convert Timestamp to string if needed
       let dateString = reservation.createdAt;
       if (reservation.createdAt && typeof reservation.createdAt.toDate === 'function') {
         dateString = reservation.createdAt.toDate().toISOString();
@@ -195,9 +191,6 @@ export default function ReservationReport() {
       } else if (role === "Teacher") {
         counts[dept].teacher++;
         console.log(`Teacher count incremented for ${dept}:`, counts[dept].teacher);
-      } else if (role === "Admin") {
-        counts[dept].admin++;
-        console.log(`Admin count incremented for ${dept}:`, counts[dept].admin);
       } else {
         console.log(`Unknown role: '${role}'`);
       }
@@ -209,18 +202,24 @@ export default function ReservationReport() {
     setReservationCounts(Object.values(counts));
   };
 
+  // Calculate summary statistics
+  const totalStudents = reservationCounts.reduce((sum, count) => 
+    sum + count.studentYear1 + count.studentYear2 + count.studentYear3 + count.studentYear4, 0
+  );
+  const totalTeachers = reservationCounts.reduce((sum, count) => sum + count.teacher, 0);
+  const overallTotal = reservationCounts.reduce((sum, count) => sum + count.total, 0);
+
   useEffect(() => {
     fetchReservations();
-  }, []); // Remove selectedDateFilter dependency since we're doing client-side filtering
+  }, []);
 
   useEffect(() => {
     calculateReservationCounts();
-  }, [reservations, selectedDepartment, selectedDateFilter]); // Add selectedDateFilter here
+  }, [reservations, selectedDepartment, selectedDateFilter]); 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
@@ -234,7 +233,7 @@ export default function ReservationReport() {
           </div>
         </div>
 
-        {/* Filters */}
+        
         <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -268,7 +267,24 @@ export default function ReservationReport() {
             </div>
           </div>
 
-          {/* Table */}
+     
+          <div className="p-4 sm:p-6 bg-gray-50 border-b border-blue-200">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{totalStudents}</div>
+                <div className="text-sm text-gray-500">Total Students</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{totalTeachers}</div>
+                <div className="text-sm text-gray-500">Total Teachers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{overallTotal}</div>
+                <div className="text-sm text-gray-500">Total Reservations</div>
+              </div>
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-sm sm:text-base">
               <thead className="bg-gray-50 border-b border-blue-700">
@@ -290,9 +306,6 @@ export default function ReservationReport() {
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Teachers
-                  </th>
-                  <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                    Admins
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     Total
@@ -333,11 +346,6 @@ export default function ReservationReport() {
                         </span>
                       </td>
                       <td className="px-3 sm:px-6 py-3 text-center">
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-                          {count.admin}
-                        </span>
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 text-center">
                         <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-bold">
                           {count.total}
                         </span>
@@ -358,3 +366,5 @@ export default function ReservationReport() {
     </div>
   );
 }
+
+export default ReservationReport;

@@ -274,7 +274,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
                     "Title",
                     "Author",
                     "Publisher",
-                    "Year",
+                    "Date Published",
                     "ISBN",
                     "Genre",
                     "Quantity",

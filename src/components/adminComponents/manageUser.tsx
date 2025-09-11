@@ -24,6 +24,7 @@ interface User {
   uid?: string;
   name: string;
   email: string;
+  address: string;
   number: string;
   department: string;
   year: string;
@@ -34,6 +35,7 @@ interface FormData {
   name: string;
   email: string;
   password: string;
+  address: string;
   number: string;
   department: string;
   year: string;
@@ -64,6 +66,7 @@ export default function LibraryUserTable() {
     name: "",
     email: "",
     password: "",
+    address: "",
     number: "",
     department: "",
     year: "",
@@ -115,6 +118,7 @@ export default function LibraryUserTable() {
       uid: user.uid,
       name: formData.name,
       email: formData.email,
+      address: formData.address,
       number: formData.number || "",
       department: formData.department || "",
       year: formData.role === "Student" ? formData.year : "",
@@ -128,6 +132,7 @@ export default function LibraryUserTable() {
       uid: user.uid,
       name: formData.name,
       email: formData.email,
+      address: formData.address,
       number: formData.number,
       department: formData.department,
       year: formData.role === "Student" ? formData.year : "",
@@ -153,6 +158,7 @@ export default function LibraryUserTable() {
       const updateData = {
         name: formData.name,
         number: formData.number,
+        address: formData.address,
         department: formData.department,
         year: formData.year,
         role: formData.role,
@@ -197,6 +203,7 @@ export default function LibraryUserTable() {
       name: "",
       email: "",
       password: "",
+      address: "",
       number: "",
       department: "",
       year: "",
@@ -216,6 +223,7 @@ export default function LibraryUserTable() {
       name: user.name,
       email: user.email,
       password: "",
+      address: user.address,
       number: user.number,
       department: user.department,
       year: user.year,
@@ -301,6 +309,7 @@ export default function LibraryUserTable() {
                   {[
                     "Name",
                     "Email",
+                    "Address",
                     "Number",
                     "Department",
                     "Year",
@@ -326,6 +335,9 @@ export default function LibraryUserTable() {
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       {user.email}
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                      {user.address}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       {user.number}

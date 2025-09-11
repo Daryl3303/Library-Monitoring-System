@@ -4,7 +4,7 @@ import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { TiHome } from "react-icons/ti";
 import { auth, db } from "../../firebase/firebase";
-import { getDocs, collection } from "firebase/firestore";
+import { onSnapshot, doc } from "firebase/firestore";
 
 interface dropdownUserProps {
   onLogoutClick: () => void;
@@ -68,30 +68,21 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const userDoc = querySnapshot.docs.find(
-        (doc) => doc.id === currentUser.uid
-      );
-
-      if (userDoc) {
-        const data = userDoc.data();
-        setUserName(data.name || "");
-        setUserEmail(data.email || "");
-        setUserRole(data.role || "");
-      }
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
-  }, []);
+  const currentUser = auth.currentUser;
+  if (!currentUser) return;
+
+  const unsub = onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setUserName(data.name || "");
+      setUserEmail(data.email || "");
+      setUserRole(data.role || "");
+    }
+  });
+
+  return () => unsub();
+}, []);
 
   const  handleWelcomePage = () => {
     onWelcomePage?.();

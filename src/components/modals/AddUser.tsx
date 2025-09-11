@@ -6,6 +6,7 @@ interface FormData {
   name: string;
   email: string;
   password: string;
+  address: string;
   number: string;
   department: string;
   year: string;
@@ -210,7 +211,7 @@ function UserFormModal({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center rounded-r-lg transition-colors"
                 >
                   {showPassword ? (
                     <Eye className="h-5 w-5 text-gray-400" />
@@ -222,6 +223,21 @@ function UserFormModal({
             </div>
               )}
 
+            <div>
+              <label className="block text-sm font-semibold text-blue-700 mb-1">
+                Address
+              </label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your current address"
+                required
+              />
+            </div>
   
             <div>
               <label className="block text-sm font-semibold text-blue-700 mb-1">
