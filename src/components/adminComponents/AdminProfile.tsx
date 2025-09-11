@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { updatePassword } from 'firebase/auth';
 import { db, auth } from '../../firebase/firebase';
-import { User, Eye, EyeOff, Mail, Phone, Building2} from 'lucide-react';
+import { User, Eye, EyeOff, Mail, Phone, Building2, MapPin} from 'lucide-react';
 
 const UserProfile: React.FC = () => {
   const [adminData, setAdminData] = useState({
     name: "",
     email: "",
+    address: "",
     number: "",
     department: "",
     password: "" 
@@ -38,16 +39,13 @@ const UserProfile: React.FC = () => {
         let adminDocRef = doc(db, "users", user.uid);
         let adminDoc = await getDoc(adminDocRef);
 
-        if (!adminDoc.exists()) {
-          adminDocRef = doc(db, "admins", user.uid);
-          adminDoc = await getDoc(adminDocRef);
-        }
 
         if (adminDoc.exists()) {
           const data = adminDoc.data();
           setAdminData({
             name: data.name || "",
             email: data.email || user.email || "",
+            address: data.address || "",
             number: data.number || "",
             department: data.department || "",
             password: ""
@@ -56,6 +54,7 @@ const UserProfile: React.FC = () => {
           setAdminData({
             name: user.displayName || "",
             email: user.email || "",
+            address: "",
             number: "",
             department: "",
             password: ""
@@ -141,6 +140,7 @@ const UserProfile: React.FC = () => {
       await setDoc(adminDocRef, {
         name: adminData.name.trim(),
         email: adminData.email.trim(),
+        address: adminData.address.trim(),
         number: adminData.number.trim(),
         department: adminData.department,
         updatedAt: new Date().toISOString()
@@ -225,7 +225,6 @@ const UserProfile: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-        {/* Profile Form */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
           <div className="p-8 lg:p-12">
             {successMessage && (
@@ -255,7 +254,6 @@ const UserProfile: React.FC = () => {
             )}
             
             <form onSubmit={handleSubmit} className="space-y-10">
-              {/* Personal Information Section */}
               <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-3xl border border-gray-100">
                 <h3 className="text-3xl font-bold text-gray-900 flex items-center gap-4 mb-8">
                   <span className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
@@ -265,7 +263,6 @@ const UserProfile: React.FC = () => {
                 </h3>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Name Field */}
                   <div className="space-y-3">
                     <label htmlFor="name" className="block text-lg font-semibold text-gray-700">
                       Full Name *
@@ -294,7 +291,6 @@ const UserProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Email Field */}
                   <div className="space-y-3">
                     <label htmlFor="email" className="block text-lg font-semibold text-gray-700">
                       Email Address *
@@ -322,7 +318,33 @@ const UserProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Phone Number Field */}
+                  <div className="space-y-3">
+                    <label htmlFor="address" className="block text-lg font-semibold text-gray-700">
+                      Address *
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        value={adminData.address}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl border-2"
+                        placeholder="Enter your address"
+                      />
+                    </div>
+                    {errors.address && (
+                      <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {errors.address}
+                      </p>
+                    )}
+                  </div>
+
+             
                   <div className="space-y-3">
                     <label htmlFor="number" className="block text-lg font-semibold text-gray-700">
                       Phone Number
@@ -351,7 +373,6 @@ const UserProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Department Field */}
                   <div className="space-y-3">
                     <label htmlFor="department" className="block text-lg font-semibold text-gray-700">
                       Department *
@@ -385,7 +406,7 @@ const UserProfile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Password Section */}
+         
               <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-3xl border-2 border-red-100 overflow-hidden">
                 <div className="p-8">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
@@ -441,7 +462,7 @@ const UserProfile: React.FC = () => {
                             />
                             <button
                               type="button"
-                              className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-100 rounded-r-2xl transition-colors"
+                              className="absolute inset-y-0 right-0 pr-4 flex items-center rounded-r-2xl transition-colors"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (

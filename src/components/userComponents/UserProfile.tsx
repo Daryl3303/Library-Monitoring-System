@@ -10,6 +10,7 @@ const UserProfile: React.FC = () => {
     name: "",
     email: "",
     number: "",
+    address: "",
     department: "",
     password: "" 
   });
@@ -48,6 +49,7 @@ const UserProfile: React.FC = () => {
             setUserData({
               name: data.name || "",
               email: data.email || user.email || "",
+              address: data.address || "",
               number: data.number || "",
               department: data.department || "",
               password: ""
@@ -56,6 +58,7 @@ const UserProfile: React.FC = () => {
             setUserData({
               name: user.displayName || "",
               email: user.email || "",
+              address: "",
               number: "",
               department: "",
               password: ""
@@ -142,6 +145,7 @@ const UserProfile: React.FC = () => {
         await setDoc(userDocRef, {
           name: userData.name.trim(),
           email: userData.email.trim(),
+          address: userData.address.trim(),
           number: userData.number.trim(),
           department: userData.department,
           updatedAt: new Date().toISOString()
@@ -225,9 +229,6 @@ const UserProfile: React.FC = () => {
   return (
     
       <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Header */}
-
-        {/* Profile Form */}
         <div className=" overflow-hidden">
           <div className="p-0 sm:p-2 lg:p-3">
             {successMessage && (
@@ -253,7 +254,6 @@ const UserProfile: React.FC = () => {
             )}
             
             <div className="space-y-3 sm:space-y-8">
-              {/* Personal Information Section */}
               <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-gray-100">
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
                   <span className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center">
@@ -263,7 +263,6 @@ const UserProfile: React.FC = () => {
                 </h3>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                  {/* Name Field */}
                   <div className="space-y-2 sm:space-y-3">
                     <label htmlFor="name" className="block text-sm sm:text-base lg:text-lg font-semibold text-gray-700">
                       Full Name *
@@ -290,7 +289,7 @@ const UserProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Email Field */}
+              
                   <div className="space-y-2 sm:space-y-3">
                     <label htmlFor="email" className="block text-sm sm:text-base lg:text-lg font-semibold text-gray-700">
                       Email Address *
@@ -315,7 +314,31 @@ const UserProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Phone Number Field */}
+                  <div className="space-y-2 sm:space-y-3">
+                    <label htmlFor="address" className="block text-sm sm:text-base lg:text-lg font-semibold text-gray-700">
+                      Address *
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        value={userData.address}
+                        onChange={handleInputChange}
+                        readOnly
+                        className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl border-2 text-sm sm:text-base lg:text-lg"
+                      />
+                    </div>
+                    {errors.address && (
+                      <p className="text-red-600 text-xs sm:text-sm font-medium flex items-center gap-2">
+                        <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {errors.address}
+                      </p>
+                    )}
+                  </div>
+                  
+
                   <div className="space-y-2 sm:space-y-3">
                     <label htmlFor="number" className="block text-sm sm:text-base lg:text-lg font-semibold text-gray-700">
                       Phone Number
@@ -379,7 +402,7 @@ const UserProfile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Password Section */}
+       
               <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl sm:rounded-3xl border-2 border-red-100 overflow-hidden">
                 <div className="p-4 sm:p-6 lg:p-8">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -435,7 +458,7 @@ const UserProfile: React.FC = () => {
                             />
                             <button
                               type="button"
-                              className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center hover:bg-gray-100 rounded-r-xl sm:rounded-r-2xl transition-colors"
+                              className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center rounded-r-xl sm:rounded-r-2xl transition-colors"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (

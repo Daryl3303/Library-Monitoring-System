@@ -1,5 +1,4 @@
 import SignIn from './components/SignIn.tsx'
-import SignUp from './components/SignUp.tsx'
 import Admin from './components/Admin.tsx'
 import UserMain from './components/UserMain.tsx'
 import ProtectedRoute from './context/protectedRoute.tsx'
@@ -10,7 +9,6 @@ const App = () => {
         <Router>
             <Routes>
                 <Route path="/signIn" element={<SignIn />} />
-                <Route path="/signUp" element={<SignUp />} />
                 <Route path="/admin/*" element={
                     <ProtectedRoute>
                     <Admin />
