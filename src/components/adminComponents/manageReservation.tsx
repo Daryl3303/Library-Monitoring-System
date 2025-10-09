@@ -12,6 +12,7 @@ import { db } from "../../firebase/firebase";
 interface ReservationStatus {
   id?: string;
   uid?: string;
+  referenceNumber: string;
   name: string;
   email: string;
   department: string;
@@ -278,7 +279,7 @@ const ReservationManagement = () => {
 
   const filteredReservationStatus = reservationStatus
     .filter((res) => {
-      const matchesSearch = res.name
+      const matchesSearch = res.referenceNumber
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
       const matchesDepartment =
@@ -303,7 +304,7 @@ const ReservationManagement = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div>
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
@@ -326,7 +327,7 @@ const ReservationManagement = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    placeholder="Search by name..."
+                    placeholder="Search by reference #"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
@@ -377,6 +378,7 @@ const ReservationManagement = () => {
               <thead className="bg-gray-50 border-b border-blue-700">
                 <tr>
                   {[
+                    "Reference #",
                     "Name",
                     "Email",
                     "Department",
@@ -406,6 +408,9 @@ const ReservationManagement = () => {
               <tbody className="bg-white divide-y divide-blue-200">
                 {filteredReservationStatus.map((res) => (
                   <tr key={res.id} className="hover:bg-gray-50">
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
+                        {res.referenceNumber}
+                      </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
                       {res.name}
                     </td>

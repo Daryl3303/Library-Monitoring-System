@@ -33,6 +33,7 @@ interface User {
   uid?: string;
   name: string;
   email: string;
+  address: string;
   number: string;
   department: string;
   year: string;
@@ -42,6 +43,7 @@ interface User {
 interface FormData {
   id?: string;
   uid?: string;
+  referenceNumber: string;
   name: string;
   email: string;
   department: string;
@@ -57,11 +59,11 @@ interface FormData {
   createdAt: string;
   returnDate: string;
   returnedAt: string;
-
 }
 
 interface Reservation {
   id?: string;
+  referenceNumber: string;
   name: string;
   email: string;
   department: string;
@@ -71,13 +73,12 @@ interface Reservation {
   bookTitle: string;
   bookAuthor: string;
   bookIsbn: string;
-   availableBooks: number;
+  availableBooks: number;
   role: string;
   borrowQuantity: number;
   createdAt: string;
   returnDate: string;
   returnedAt: string;
-
 }
 
 const ViewBooks: React.FC = () => {
@@ -94,6 +95,7 @@ const ViewBooks: React.FC = () => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [showReserveModal, setShowReserveModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    referenceNumber: "",
     name: "",
     email: "",
     department: "",
@@ -211,13 +213,16 @@ const ViewBooks: React.FC = () => {
   const returnDate = new Date(createdAt);
   returnDate.setDate(createdAt.getDate() + 7);
 
+  const newRef = Math.floor(Math.random() * 10000000000000000).toString();
+
     setFormData({
       uid: currentUser.uid,
+      referenceNumber: newRef,
       name: currentUser.name,
       email: currentUser.email,
       department: currentUser.department,
       year: currentUser.year,
-      address: "",
+      address: currentUser.address,
       phone: currentUser.number,
       bookTitle: book.title,
       bookAuthor: book.author,
@@ -330,25 +335,25 @@ const ViewBooks: React.FC = () => {
     <div
       className={`bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-2xl border border-slate-200/50 backdrop-blur-sm ${
         isMobile
-          ? "fixed inset-4 z-50 flex flex-col max-h-[calc(100vh-2rem)] overflow-hidden"
-          : "sticky top-4"
+          ? "fixed inset-4 z-50 flex flex-col max-h-[calc(100vh-7rem)]"
+          : "sticky top-4 max-h-[100vh] flex flex-col"
       }`}
     >
-      <div
-        className={`${isMobile ? "flex-1 overflow-y-auto" : ""} p-6 relative`}
-      >
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/50">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-            About This Book
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full transition-all duration-200 hover:scale-110 group"
-          >
-            <X className="w-5 h-5 text-slate-600 group-hover:text-slate-800" />
-          </button>
-        </div>
+   
+      <div className="flex items-center justify-between p-6 pb-4 border-b border-slate-200/50 flex-shrink-0">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
+          About This Book
+        </h2>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-slate-100 rounded-full transition-all duration-200 hover:scale-110 group"
+        >
+          <X className="w-5 h-5 text-slate-600 group-hover:text-slate-800" />
+        </button>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 pt-2">
         <div className="space-y-6">
           <div className="relative">
             <div className="aspect-[2/3] w-36 mx-auto bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl overflow-hidden shadow-lg ring-1 ring-slate-200">
@@ -425,43 +430,43 @@ const ViewBooks: React.FC = () => {
                 <p className="text-sm font-semibold text-slate-600 mb-1">
                   Description
                 </p>
-                <p className="text-sm leading-relaxed text-slate-700">
+                <p className="text-sm leading-relaxed text-slate-700 break-words">
                   {book.description}
                 </p>
               </div>
             </div>
           </div>
-
-          <div className="pt-4 border-t border-slate-200/50">
-            <div className="flex items-center justify-center mb-4">
-              <span
-                className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-lg ${
-                  book.quantity > 0
-                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-emerald-200"
-                    : "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-200"
-                }`}
-              >
-                {book.quantity > 0
-                  ? `Available (${book.quantity} copies)`
-                  : "Not Available"}
-              </span>
-            </div>
-
-            {book.quantity > 0 && (
-              <button
-                onClick={() => onReserve(book)}
-                disabled={book.quantity === 0}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform shadow-lg ${
-                  book.quantity > 0
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl hover:scale-105 active:scale-95"
-                    : "bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed shadow-gray-200"
-                }`}
-              >
-                Reserve Book
-              </button>
-            )}
-          </div>
         </div>
+      </div>
+
+      <div className="p-6 pt-4 border-t border-slate-200/50 bg-white/80 backdrop-blur-sm flex-shrink-0">
+        <div className="flex items-center justify-center mb-4">
+          <span
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-lg ${
+              book.quantity > 0
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-emerald-200"
+                : "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-200"
+            }`}
+          >
+            {book.quantity > 0
+              ? `Available (${book.quantity} copies)`
+              : "Not Available"}
+          </span>
+        </div>
+
+        {book.quantity > 0 && (
+          <button
+            onClick={() => onReserve(book)}
+            disabled={book.quantity === 0}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform shadow-lg ${
+              book.quantity > 0
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-xl hover:scale-105 active:scale-95"
+                : "bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed shadow-gray-200"
+            }`}
+          >
+            Reserve Book
+          </button>
+        )}
       </div>
     </div>
   );
@@ -522,7 +527,7 @@ const ViewBooks: React.FC = () => {
                       ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                       : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
                   }`}
-                >
+                >   
                   {filteredBooks.map((book) => (
                     <BookCard key={book.id} book={book} />
                   ))}
@@ -552,7 +557,7 @@ const ViewBooks: React.FC = () => {
           {selectedBook && isMobile && (
             <>
               <div
-                className="fixed inset-0 bg-black bg-opacity-50 flex-shrink-0 z-40"
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
                 onClick={handleCloseOverview}
               />
               <BookOverview

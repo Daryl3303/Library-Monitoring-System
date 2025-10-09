@@ -173,8 +173,8 @@ const UserMain: React.FC = () => {
   
        
       <main
-        className="transition-all duration-300 pt-[80px] min-h-screen bg-gray-50"
-        style={{ zIndex: 40 }}
+        className="transition-all duration-300 pt-[80px] bg-gray-50"
+        style={{ zIndex: 40    }}
       >
         <div
           className={` transition-all duration-300 ease-in-out transform ${

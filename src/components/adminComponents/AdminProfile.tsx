@@ -222,8 +222,8 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="min-h-screen">
+      <div className="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
           <div className="p-8 lg:p-12">

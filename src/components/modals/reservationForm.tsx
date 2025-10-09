@@ -6,6 +6,7 @@ import { Book } from "../userComponents/viewBooks";
 interface FormData {
   id?: string;
   uid?: string;
+  referenceNumber: string;
   name: string;
   email: string;
   department: string;
@@ -118,7 +119,7 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
         className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border border-blue-200 flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxHeight: "85vh",
+          maxHeight: "80vh",
           position: "relative",
           zIndex: 10000,
           transform: "none",
@@ -270,7 +271,7 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
                   }
                   className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-gray-50"
                   placeholder="Enter your complete address"
-                  required
+                  disabled
                 />
               </div>
               </div>
