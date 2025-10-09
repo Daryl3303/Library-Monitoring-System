@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "library-monitoring-syste-741eb"
-  }
+    "default": "lcc-library-system-c1a30",
+    "2nd deployment": "lcc-library-system-c1a30"
+  },
+  "targets": {},
+  "etags": {}
 }

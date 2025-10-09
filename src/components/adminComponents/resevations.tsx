@@ -6,6 +6,7 @@ import { db } from "../../firebase/firebase";
 interface Reservation {
   id?: string;
   uid?: string;
+  referenceNumber: string;
   name: string;
   email: string;
   department: string;
@@ -142,7 +143,7 @@ const Reservations = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div>
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
 
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
@@ -197,6 +198,7 @@ const Reservations = () => {
               <thead className="bg-gray-50 border-b border-blue-700">
                 <tr>
                   {[
+                    "Reference #",
                     "Name",
                     "Email",
                     "Department",
@@ -226,6 +228,9 @@ const Reservations = () => {
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((res) => (
                     <tr key={res.id} className="hover:bg-gray-50">
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
+                        {res.referenceNumber}
+                      </td>
                       <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
                         {res.name}
                       </td>

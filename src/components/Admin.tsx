@@ -25,7 +25,6 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -103,42 +102,40 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 };
 const Admin: React.FC = () => {
   const [pageState, setPageState] = useState<string>("/");
-   const location = useLocation();
+  const location = useLocation();
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
-    const { logout } = useAuth();  
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
-   useEffect(() => {
+  useEffect(() => {
     const currentPath = location.pathname;
-    
-    
+
     const pathMapping: { [key: string]: string } = {
-      '/admin': '/',
-      '/admin/dashboard': '/',
-      '/admin/reservations': '/reservations',
-      '/admin/book-status': '/bookStatus',
-      '/admin/reservation-report': '/reservationReport',
-      '/admin/book-report': '/bookReport',
-      '/admin/reservation-management': '/reservationManagement',
-      '/admin/manage-user': '/manageUser',
-      '/admin/user-profile': '/userProfile',
+      "/admin": "/",
+      "/admin/dashboard": "/",
+      "/admin/reservations": "/reservations",
+      "/admin/book-status": "/bookStatus",
+      "/admin/reservation-report": "/reservationReport",
+      "/admin/book-report": "/bookReport",
+      "/admin/reservation-management": "/reservationManagement",
+      "/admin/manage-user": "/manageUser",
+      "/admin/user-profile": "/userProfile",
     };
 
-    const mappedPath = pathMapping[currentPath] || '/';
+    const mappedPath = pathMapping[currentPath] || "/";
     setPageState(mappedPath);
   }, [location.pathname]);
-
 
   const handleLogoutClick = (): void => {
     setLogoutModalOpen(true);
   };
 
   const handleLogoutConfirm = async (): Promise<void> => {
-    await logout();               
+    await logout();
     setLogoutModalOpen(false);
-    navigate("/signIn");         
+    navigate("/signIn");
   };
 
   const handlePageChange = (path: string): void => {
@@ -148,17 +145,17 @@ const Admin: React.FC = () => {
       setIsTransitioning(true);
 
       const urlMapping: { [key: string]: string } = {
-        '/': '/admin/dashboard',
-        '/reservations': '/admin/reservations',
-        '/bookStatus': '/admin/book-status',
-        '/reservationReport': '/admin/reservation-report',
-        '/bookReport': '/admin/book-report',
-        '/reservationManagement': '/admin/reservation-management',
-        '/manageUser': '/admin/manage-user',
-        '/userProfile': '/admin/user-profile',
+        "/": "/admin/dashboard",
+        "/reservations": "/admin/reservations",
+        "/bookStatus": "/admin/book-status",
+        "/reservationReport": "/admin/reservation-report",
+        "/bookReport": "/admin/book-report",
+        "/reservationManagement": "/admin/reservation-management",
+        "/manageUser": "/admin/manage-user",
+        "/userProfile": "/admin/user-profile",
       };
 
-      const urlPath = urlMapping[path] || '/admin/dashboard';
+      const urlPath = urlMapping[path] || "/admin/dashboard";
 
       setTimeout(() => {
         setPageState(path);
@@ -169,7 +166,7 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen oveflow-hidden">
       <div
         className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow"
         style={{ zIndex: 60 }}
@@ -185,7 +182,7 @@ const Admin: React.FC = () => {
           onLogoutClick={handleLogoutClick}
         />
       </div>
-      
+
       <div
         className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300"
         style={{ zIndex: 50 }}
@@ -194,8 +191,12 @@ const Admin: React.FC = () => {
       </div>
 
       <main
-        className="flex-1 transition-all duration-300 ml-64 pt-[60px] min-h-screen bg-gray-50"
-        style={{ zIndex: 40 }}
+        className="flex-1 transition-all duration-300 ml-64 pt-[60px] bg-gray-50"
+        style={{
+          zIndex: 40,
+          height: "calc(100vh - 60px)",
+          overflowY: "auto",
+        }}
       >
         <div
           className={`p-6 transition-all duration-300 ease-in-out transform ${

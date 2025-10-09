@@ -206,7 +206,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 h-screen overflow-y-auto">
+    <div>
       <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
@@ -223,7 +223,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
         </div>
 
       
-        <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
+        <div className="bg-white rounded-[20px] border border-blue-800">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         
