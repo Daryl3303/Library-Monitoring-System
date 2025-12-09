@@ -207,7 +207,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
 
   return (
     <div>
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+      <div className="w-full h-full bg-gray-50 p-5">
         {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">

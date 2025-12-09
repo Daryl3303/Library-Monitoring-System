@@ -132,7 +132,7 @@ const Reservations = () => {
 
 
   const filteredReservations = reservations.filter((res) => {
-    const matchesSearch = res.name
+    const matchesSearch = res.referenceNumber
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesDepartment =
@@ -144,7 +144,7 @@ const Reservations = () => {
 
   return (
     <div>
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+      <div className="w-full h-full bg-gray-50 p-5">
 
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ const Reservations = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    placeholder="Search by name..."
+                    placeholder="Search by reference #"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"

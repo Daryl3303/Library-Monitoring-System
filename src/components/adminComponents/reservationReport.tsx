@@ -11,7 +11,7 @@ interface ReservationData {
   id?: string;
   department: string;
   year: string;
-  role: "Student" | "Teacher" | "Admin";
+  role: "Student" | "Teacher" ;
   reservationDate?: any;
   createdAt?: any; 
 }
@@ -31,8 +31,8 @@ const departments = [
   "Bachelor of Science in Information Technology",
   "Bachelor of Science in Business Administration",
   "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education",
-  "Bachelor of Science in Secondary Education",
+  "Bachelor in Elementary Education",
+  "Bachelor in Secondary Education",
 ];
 
 const dateFilters = [
@@ -219,7 +219,7 @@ const ReservationReport = () => {
 
   return (
     <div>
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+      <div className="w-full h-full bg-gray-50 p-5">
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">

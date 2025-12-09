@@ -73,39 +73,11 @@ function AddBookModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick}
-      style={{
-        zIndex: 9999,
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
-        margin: 0,
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl border border-blue-200 flex flex-col mx-auto"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxHeight: "85vh",
-          position: "relative",
-          zIndex: 10000,
-          transform: "none",
-          margin: "0 auto",
-          top: "-3%",
-          right: "9%",
-        }}
-      >
+   <div className="fixed inset-0 z-50 flex items-center justify-center"
+     onClick={handleBackdropClick}>
+        <div
+        className="bg-gray-50 w-full h-full"
+        onClick={(e) => e.stopPropagation()} >
      
         <div className="flex justify-between items-center p-6 border-b border-blue-300 bg-blue-50 rounded-t-2xl flex-shrink-0">
           <h3 className="text-xl font-bold text-blue-800">

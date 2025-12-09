@@ -10,7 +10,7 @@ import {
   Hash,
   FileText,
 } from "lucide-react";
-import { collection, getDocs, getDoc, doc, addDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, addDoc, setDoc, query, where } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
 import ReserveModal from "../modals/reservationForm";
 import SuccessAnimation  from "../Success/successAnimation";
@@ -162,6 +162,38 @@ const ViewBooks: React.FC = () => {
     }
   };
 
+  // Function to generate unique reference number
+  const generateUniqueReferenceNumber = async (): Promise<string> => {
+    let isUnique = false;
+    let newRef = "";
+
+    while (!isUnique) {
+      // Generate a random 16-digit reference number
+      newRef = Math.floor(Math.random() * 1000000000).toString();
+      
+      // Check if this reference number exists in reservations
+      const reservationsQuery = query(
+        collection(db, "reservations"),
+        where("referenceNumber", "==", newRef)
+      );
+      const reservationsSnapshot = await getDocs(reservationsQuery);
+      
+      // Check if this reference number exists in reservationStatus
+      const statusQuery = query(
+        collection(db, "reservationStatus"),
+        where("referenceNumber", "==", newRef)
+      );
+      const statusSnapshot = await getDocs(statusQuery);
+      
+      // If not found in both collections, it's unique
+      if (reservationsSnapshot.empty && statusSnapshot.empty) {
+        isUnique = true;
+      }
+    }
+
+    return newRef;
+  };
+
   useEffect(() => {
     fetchCurrentUser();
     fetchBooks();
@@ -205,15 +237,14 @@ const ViewBooks: React.FC = () => {
     setSelectedBook(null);
   };
 
-  const handleReserve = (book: Book) => {
+  const handleReserve = async (book: Book) => {
     if (!currentUser) return;
     setSelectedBook(book);
 
-     const createdAt = new Date();
-  const returnDate = new Date(createdAt);
-  returnDate.setDate(createdAt.getDate() + 7);
-
-  const newRef = Math.floor(Math.random() * 10000000000000000).toString();
+    const createdAt = new Date();
+    
+    // Generate unique reference number
+    const newRef = await generateUniqueReferenceNumber();
 
     setFormData({
       uid: currentUser.uid,
@@ -231,7 +262,7 @@ const ViewBooks: React.FC = () => {
       role: currentUser.role,
       borrowQuantity: 0,
       createdAt: createdAt.toISOString(),
-      returnDate: returnDate.toISOString(),
+      returnDate: "", // Empty initially - user will select
       returnedAt: "",
     });
 
@@ -240,23 +271,32 @@ const ViewBooks: React.FC = () => {
 
   const handleAddReservation = async () => {
     try {
+      setReservationError("");
 
-         setReservationError("");
+      if (formData.borrowQuantity > formData.availableBooks) {
+        throw new Error(`Cannot reserve ${formData.borrowQuantity} books. Only ${formData.availableBooks} available.`);
+      }
 
-   if (formData.borrowQuantity > formData.availableBooks) {
-   throw new Error (`Cannot reserve ${formData.borrowQuantity} books. Only ${formData.availableBooks} available.`);
-    return;
-  }
-
-  if (formData.borrowQuantity <= 0) {
-    throw new Error ("Please enter a valid quantity (minimum 1).");
-    return;
-  }
-  
-   if (!formData.address.trim()) {
+      if (formData.borrowQuantity <= 0) {
+        throw new Error("Please enter a valid quantity (minimum 1).");
+      }
+      
+      if (!formData.address.trim()) {
         throw new Error("Please enter your address.");
       }
-    
+
+      if (!formData.returnDate) {
+        throw new Error("Please select a return date.");
+      }
+
+      // Validate that return date is in the future
+      const returnDate = new Date(formData.returnDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (returnDate < today) {
+        throw new Error("Return date must be today or in the future.");
+      }
  
       const newReservations = { ...formData };
 
@@ -264,17 +304,18 @@ const ViewBooks: React.FC = () => {
         collection(db, "reservations"),
         newReservations
       );
-       const statusData = {
-      ...formData,
-      status: "Pending",
-    };
+      
+      const statusData = {
+        ...formData,
+        status: "Pending",
+      };
 
-    await setDoc(doc(db, "reservationStatus", docRef.id), statusData);
+      await setDoc(doc(db, "reservationStatus", docRef.id), statusData);
       setReservations([...reservations, { id: docRef.id, ...newReservations }]);
       setShowReserveModal(false);
       setSelectedBook(null); 
       setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 7000)
+      setTimeout(() => setShowSuccess(false), 7000);
     } catch (error) {
       console.error("Error Reservation:", error);
       if (error instanceof Error) {
