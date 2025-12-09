@@ -177,8 +177,7 @@ const BookReports = () => {
   }, [reservations, selectedDateFilter]);
 
   return (
-    <div>
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+    <div className="w-full h-full bg-gray-50 p-5">
         {/* Header */}
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
@@ -189,7 +188,6 @@ const BookReports = () => {
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
                 Book Reservation Report
               </h1>
-              <p className="text-gray-600 mt-1">Track book reservations by title and ISBN</p>
             </div>
           </div>
         </div>
@@ -320,7 +318,7 @@ const BookReports = () => {
           </div>
         </div>
       </div>
-    </div>
+ 
   );
 }
 

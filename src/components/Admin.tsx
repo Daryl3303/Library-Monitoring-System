@@ -4,13 +4,13 @@ import Navbar from "./adminComponents/navbar";
 import Dashboard from "./adminComponents/dashboard";
 import Reservations from "./adminComponents/resevations";
 import BookStatus from "./adminComponents/bookStatus";
+import EntryLog from "./adminComponents/entry";
 import ReservationReport from "./adminComponents/reservationReport";
 import BookReports from "./adminComponents/bookReport";
 import ReservationManagement from "./adminComponents/manageReservation";
 import ManageUser from "./adminComponents/manageUser";
-import UserProfile from "./adminComponents/AdminProfile";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -117,11 +117,11 @@ const Admin: React.FC = () => {
       "/admin/dashboard": "/",
       "/admin/reservations": "/reservations",
       "/admin/book-status": "/bookStatus",
+      "/admin/entryRecords": "/entryRecords",
       "/admin/reservation-report": "/reservationReport",
       "/admin/book-report": "/bookReport",
       "/admin/reservation-management": "/reservationManagement",
       "/admin/manage-user": "/manageUser",
-      "/admin/user-profile": "/userProfile",
     };
 
     const mappedPath = pathMapping[currentPath] || "/";
@@ -135,7 +135,7 @@ const Admin: React.FC = () => {
   const handleLogoutConfirm = async (): Promise<void> => {
     await logout();
     setLogoutModalOpen(false);
-    navigate("/signIn");
+    navigate("/admin/signIn");
   };
 
   const handlePageChange = (path: string): void => {
@@ -148,11 +148,11 @@ const Admin: React.FC = () => {
         "/": "/admin/dashboard",
         "/reservations": "/admin/reservations",
         "/bookStatus": "/admin/book-status",
+        "/entryRecords": "/admin/entryRecords",
         "/reservationReport": "/admin/reservation-report",
         "/bookReport": "/admin/book-report",
         "/reservationManagement": "/admin/reservation-management",
         "/manageUser": "/admin/manage-user",
-        "/userProfile": "/admin/user-profile",
       };
 
       const urlPath = urlMapping[path] || "/admin/dashboard";
@@ -166,11 +166,8 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen oveflow-hidden">
-      <div
-        className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow"
-        style={{ zIndex: 60 }}
-      >
+    <div className="flex overflow-hidden bg-gray-50">
+      <div className="fixed top-0 left-0 right-0 h-[80px] bg-white shadow-lg z-50">
         <Navbar
           onChangeState={(path) => {
             if (path === "/logout") {
@@ -180,23 +177,18 @@ const Admin: React.FC = () => {
             }
           }}
           onLogoutClick={handleLogoutClick}
+
         />
       </div>
 
       <div
-        className="fixed top-[60px] left-0 h-[calc(100vh-60px)] bg-white shadow transition-all duration-300"
-        style={{ zIndex: 50 }}
+        className="fixed top-[80px] left-0 w-72 h-[calc(100vh-80px)] bg-white shadow-xl z-40 overflow-hidden"
       >
         <Sidebar currentPage={pageState} onPageChange={handlePageChange} />
       </div>
 
       <main
-        className="flex-1 transition-all duration-300 ml-64 pt-[60px] bg-gray-50"
-        style={{
-          zIndex: 40,
-          height: "calc(100vh - 60px)",
-          overflowY: "auto",
-        }}
+        className="absolute top-[80px] left-72 right-0 bottom-0 bg-gray-50 overflow-y-auto"
       >
         <div
           className={`p-6 transition-all duration-300 ease-in-out transform ${
@@ -220,6 +212,11 @@ const Admin: React.FC = () => {
               <BookStatus />
             </div>
           )}
+          {pageState === "/entryRecords" && (
+            <div className="animate-fade-in">
+              <EntryLog />
+            </div>
+          )}
           {pageState === "/reservationReport" && (
             <div className="animate-fade-in">
               <ReservationReport />
@@ -238,11 +235,6 @@ const Admin: React.FC = () => {
           {pageState === "/manageUser" && (
             <div className="animate-fade-in">
               <ManageUser />
-            </div>
-          )}
-          {pageState === "/userProfile" && (
-            <div className="animate-fade-in">
-              <UserProfile />
             </div>
           )}
         </div>

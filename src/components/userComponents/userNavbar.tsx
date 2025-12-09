@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, User, Menu } from "lucide-react";
+import { ChevronDown, User, Menu, ClipboardClock } from "lucide-react";
 import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { TiHome } from "react-icons/ti";
@@ -38,6 +38,11 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
       icon: <FaUserCog size={20} />,
       label: "Profile",
       path: "/userProfile",
+    },
+    {
+      icon: <ClipboardClock size={20} />,
+      label: "Borrowed Books",
+      path: "/borrowedBooks",
     },
     {
       icon: <LuLogOut size={20} />,
