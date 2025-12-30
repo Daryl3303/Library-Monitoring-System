@@ -1,9 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { ChevronDown, User } from "lucide-react";
-import { FaUserCog } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
-import { auth, db } from "../../firebase/firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 interface dropdownProps {
   onLogoutClick: () => void;
@@ -19,11 +16,6 @@ interface dropdownMenu {
 const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
   const dropdownMenus: dropdownMenu[] = [
     {
-      icon: <FaUserCog size={24} />,
-      label: "Profile",
-      path: "/userProfile",
-    },
-    {
       icon: <LuLogOut size={24} />,
       label: "Logout",
       path: "/logout",
@@ -32,8 +24,6 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [userName, setUserName] = useState("Loading...");
-  const [userEmail, setUserEmail] = useState("");
 
   const handleDropdownToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,29 +40,7 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-
-      
-      const docRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUserName(data.name || currentUser.displayName || "Unknown User");
-        setUserEmail(data.email || currentUser.email || "");
-      } else {
-     
-        setUserName(currentUser.displayName || "Unknown User");
-        setUserEmail(currentUser.email || "");
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
+  
   return (
     <>
 
@@ -101,9 +69,6 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-white text-sm font-medium">
-                    {userName}
-                  </div>
                   <div className="text-white/80 text-xs">Admin</div>
                 </div>
                 <ChevronDown
@@ -119,34 +84,18 @@ const Navbar: React.FC<dropdownProps> = ({ onChangeState, onLogoutClick }) => {
 
       {isDropdownOpen && (
         <div
-          className="fixed top-[70px] right-6 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 transform transition-all duration-200 ease-out"
+          className="fixed top-[70px] right-6 w-55 bg-white rounded-2xl shadow-2xl border border-gray-100  transform transition-all duration-200 ease-out"
           style={{
             zIndex: 60,
             position: "fixed",
           }}
         >
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-500 rounded-full p-2">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-gray-900">{userName}</div>
-                <div
-                  className="text-sm text-gray-600 truncate max-w-[180px]"
-                  title={userEmail}
-                >
-                  {userEmail}
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="py-2">
+          <div className="py-1">
             {dropdownMenus.map((item) => (
               <button
                 key={item.path}
-                className="w-full flex items-center px-6 py-3 hover:bg-gray-100 transition-colors duration-150 text-left"
+                className="w-full flex items-center px-6 py-3 transform transistion-transform hover:scale-105 duration-300 text-left"
                 onClick={() => handleMenuItemClick(item)}
               >
                 <div

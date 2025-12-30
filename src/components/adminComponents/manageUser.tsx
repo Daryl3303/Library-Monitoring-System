@@ -28,7 +28,7 @@ interface User {
   number: string;
   department: string;
   year: string;
-  role: "Student" | "Teacher" | "Admin";
+  role: "Student" | "Teacher" ;
 }
 
 interface FormData {
@@ -39,7 +39,7 @@ interface FormData {
   number: string;
   department: string;
   year: string;
-  role: "Student" | "Teacher" | "Admin";
+  role: "Student" | "Teacher";
 }
 
 const departments = [
@@ -47,8 +47,8 @@ const departments = [
   "Bachelor of Science in Information Technology",
   "Bachelor of Science in Business Administration",
   "Bachelor of Science in Hospital Management",
-  "Bachelor of Science in Elementary Education",
-  "Bachelor of Science in Secondary Education",
+  "Bachelor in Elementary Education",
+  "Bachelor in Secondary Education",
 ];
 
 export default function LibraryUserTable() {
@@ -247,7 +247,7 @@ export default function LibraryUserTable() {
 
   return (
     <div>
-      <div className="max-w-9xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+      <div className="w-full h-full bg-gray-50 p-5">
      
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
@@ -365,9 +365,7 @@ export default function LibraryUserTable() {
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-center">
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          user.role === "Admin"
-                            ? "bg-red-100 text-red-800"
-                            : user.role === "Teacher"
+                         user.role === "Teacher"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
                         }`}

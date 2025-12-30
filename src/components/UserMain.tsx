@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import UserNavbar from "./userComponents/userNavbar";
 import WelcomePage from "./userComponents/welcomePage" 
 import UserProfile from "./userComponents/UserProfile";
+import BorrowedBooks from "./userComponents/borrowedBooks";
 import ViewBooks from "./userComponents/viewBooks";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -113,6 +114,7 @@ const UserMain: React.FC = () => {
       '/user/welcome': '/',
       '/user/user-profile': '/userProfile',
       '/user/view-books': '/viewBooks',
+      '/user/borrowed-books': '/borrowedBooks',
     };
 
     const mappedPath = pathMapping[currentPath] || '/';
@@ -140,6 +142,7 @@ const UserMain: React.FC = () => {
         '/': '/user/welcome',
         '/userProfile': '/user/user-profile',
         '/viewBooks': '/user/view-books',
+        '/borrowedBooks': '/user/borrowed-books',
       };
 
       const urlPath = urlMapping[path] || '/admin/dashboard';
@@ -198,6 +201,12 @@ const UserMain: React.FC = () => {
           {pageState === "/viewBooks" && (
             <div className="animate-fade-in">
               <ViewBooks />
+            </div>
+          )}
+
+          {pageState === "/borrowedBooks" && (
+            <div className="animate-fade-in">
+              <BorrowedBooks />
             </div>
           )}
         </div>

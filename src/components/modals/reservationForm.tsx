@@ -54,6 +54,12 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   useEffect(() => {
     if (isOpen) {
       const originalOverflow = document.body.style.overflow;
@@ -360,6 +366,25 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
                     max={formData.availableBooks}
                     required
                   />
+                </div>
+
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-semibold text-blue-700 mb-1">
+                    Expected Return Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.returnDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, returnDate: e.target.value })
+                    }
+                    min={getTodayDate()}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Please select the date you plan to return the book
+                  </p>
                 </div>
               </div>
             </div>
