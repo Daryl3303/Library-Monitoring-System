@@ -10,7 +10,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import axios from "axios";
-import { generateBorrowConfirmationEmail } from "../../utils/emailUtils";
+import {
+  generateBorrowConfirmationEmail,
+  generateBorrowDeclineEmail,
+} from "../../utils/emailUtils";
 
 export interface Reservation {
   id?: string;
@@ -29,12 +32,6 @@ export interface Reservation {
   role: string;
   borrowQuantity: number;
   createdAt: string;
-}
-
-interface SendEmailPayload {
-  recipient: string;
-  subject: string;
-  html: string;
 }
 
 const Reservations = () => {
@@ -105,7 +102,7 @@ const Reservations = () => {
 
       const htmlEmail = generateBorrowConfirmationEmail(reservationData);
 
-      await axios.post("http://127.0.0.1:5000/send-email", {
+      await axios.post(import.meta.env.VITE_EMAIL_API_URL, {
         recipient: reservationData.email,
         subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
         html: htmlEmail,
@@ -122,6 +119,24 @@ const Reservations = () => {
     try {
       await updateDoc(doc(db, "reservationStatus", reservationId), {
         status: "Declined",
+      });
+      const reservationSnap = await getDoc(
+        doc(db, "reservations", reservationId)
+      );
+      if (!reservationSnap.exists()) {
+        throw new Error("Reservation not found");
+      }
+
+      const reservationData = reservationSnap.data() as Reservation;
+
+      await handleDeleteReservation(reservationId);
+
+      const htmlEmail = generateBorrowDeclineEmail(reservationData);
+
+      await axios.post(import.meta.env.VITE_EMAIL_API_URL, {
+        recipient: reservationData.email,
+        subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
+        html: htmlEmail,
       });
       await handleDeleteReservation(reservationId);
     } catch (error) {

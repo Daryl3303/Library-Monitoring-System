@@ -11,6 +11,7 @@ import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/useAuth";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { userId, loading, isAdmin } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -31,7 +33,6 @@ const SignIn = () => {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/user/*");
     } catch (err: any) {
       console.error("Sign-in error:", err.message);
       setError("Invalid credentials. Please try again.");
@@ -57,8 +58,6 @@ const SignIn = () => {
           "This Google account is not registered. Please contact admin."
         );
       }
-
-      navigate("/user/*");
     } catch (err: any) {
       console.error("Google sign-in error:", err.message);
       setError(err.message || "Google sign-in failed.");
@@ -66,6 +65,13 @@ const SignIn = () => {
       setAuthing(false);
     }
   };
+
+  useEffect(() => {
+    console.log("Auth state changed:", { userId, isAdmin, loading });
+    if (userId !== null && !loading) {
+      navigate("/user/*");
+    }
+  }, [userId, loading, isAdmin, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">

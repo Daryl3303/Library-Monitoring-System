@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
-interface ReservationStatus {
+export interface ReservationStatus {
   id?: string;
   uid?: string;
   referenceNumber: string;
@@ -271,7 +271,7 @@ const ReservationManagement = () => {
       "In Use": 3,
       Returned: 4,
       Overdue: 5,
-       Declined: 6,
+      Declined: 6,
       Canceled: 7,
     };
     return priorities[status] || 8;
@@ -409,8 +409,8 @@ const ReservationManagement = () => {
                 {filteredReservationStatus.map((res) => (
                   <tr key={res.id} className="hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
-                        {res.referenceNumber}
-                      </td>
+                      {res.referenceNumber}
+                    </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
                       {res.name}
                     </td>
