@@ -1,22 +1,23 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Users, Scan } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import {
   collection,
-  getDocs,
+  getDoc,
+  doc,
   addDoc,
   query,
   orderBy,
-  doc,
-  getDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 interface Visitor {
   id?: string;
-  name: string;
-  department: string;
-  year: string;
-  time: string;
+  Name: string;
+  Department: string;
+  Year: string;
+  timestamp: string;
+  uid?: string;
 }
 
 export default function EntryLog() {
@@ -29,48 +30,43 @@ export default function EntryLog() {
   const scannerRef = useRef<HTMLInputElement>(null);
 
   const filteredVisitors = visitors.filter((visitor) => {
-    const matchesSearch = visitor.name
+    const matchesSearch = visitor.Name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
     const matchesDepartment =
       selectedDepartment === "All Departments" ||
-      visitor.department?.toLowerCase() === selectedDepartment.toLowerCase();
+      visitor.Department?.toLowerCase() === selectedDepartment.toLowerCase();
     return matchesSearch && matchesDepartment;
   });
 
-  const fetchVisitors = async () => {
-    try {
-      const q = query(collection(db, "entryLog"), orderBy("time", "desc"));
-      const querySnapshot = await getDocs(q);
+  // Real-time listener with snapshot
+  useEffect(() => {
+    const q = query(collection(db, "logs"), orderBy("timestamp", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const visitorsData: Visitor[] = querySnapshot.docs.map((document) => ({
         id: document.id,
         ...(document.data() as Visitor),
       }));
       setVisitors(visitorsData);
 
+      // Update departments list
       const uniqueDepartments = Array.from(
         new Set(
           visitorsData
-            .map((visitor) => visitor.department?.trim())
+            .map((visitor) => visitor.Department?.trim())
             .filter(Boolean)
         )
       ).sort();
 
       setDepartments(["All Departments", ...uniqueDepartments]);
-    } catch (error) {
+    }, (error) => {
       console.error("Error fetching visitors:", error);
-    }
-  };
+    });
 
-  useEffect(() => {
-    fetchVisitors();
-    
-    const interval = setInterval(() => {
-      fetchVisitors();
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   // Keep scanner input focused
@@ -112,21 +108,21 @@ export default function EntryLog() {
 
       const userData = userSnap.data();
       
-      // Add entry to Firebase entryLog
+      // Add entry to Firebase logs collection
       const entryData = {
-        name: userData.name,
-        department: userData.department,
-        year: userData.year,
-        time: new Date().toISOString(),
+        Name: userData.Name || userData.name,
+        Department: userData.Department || userData.department,
+        Year: userData.Year || userData.year,
+        timestamp: new Date().toISOString(),
+        uid: userId.trim(),
       };
 
-      await addDoc(collection(db, "entryLog"), entryData);
+      await addDoc(collection(db, "logs"), entryData);
       
       // Show success notification
-      showNotification(`✓ Entry logged: ${userData.name}`, "success");
+      showNotification(`✓ Entry logged: ${userData.Name || userData.name}`, "success");
       
-      // Refresh the list
-      await fetchVisitors();
+      // No need to manually refresh - snapshot will update automatically
       
     } catch (error) {
       console.error("Error processing QR code:", error);
@@ -194,14 +190,13 @@ export default function EntryLog() {
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
                   Library Entry Log
                 </h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Real-time updates • {visitors.length} entries
+                </p>
               </div>
             </div>
-           
           </div>
         </div>
-
-        {/* QR Code Sample */}
-      
 
         <div className="bg-white rounded-[20px] border border-green-800">
           <div className="p-4 sm:p-6 border-b border-green-700">
@@ -252,16 +247,16 @@ export default function EntryLog() {
                 {filteredVisitors.map((visitor) => (
                   <tr key={visitor.id} className="hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 font-semibold text-center">
-                      {visitor.name}
+                      {visitor.Name}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {visitor.department}
+                      {visitor.Department}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {visitor.year}
+                      {visitor.Year}
                     </td>
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {formatTime(visitor.time)}
+                      {formatTime(visitor.timestamp)}
                     </td>
                   </tr>
                 ))}
