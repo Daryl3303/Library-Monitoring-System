@@ -1,8 +1,9 @@
 // LibraryUserTable.tsx
 import { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, User } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, User, QrCode } from "lucide-react";
 import UserFormModal from "../modals/AddUser";
 import DeleteConfirmationModal from "../modals/DeleteUser";
+import QrCodeModal from "../modals/qrcode";
 
 import {
   collection,
@@ -61,6 +62,7 @@ export default function LibraryUserTable() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -237,10 +239,16 @@ export default function LibraryUserTable() {
     setShowDeleteModal(true);
   };
 
+  const openQrModal = (user: User) => {
+    setSelectedUser(user);
+    setShowQrModal(true);
+  };
+
   const closeModals = () => {
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
+    setShowQrModal(false);
     resetForm();
     setError("");
   };
@@ -376,14 +384,23 @@ export default function LibraryUserTable() {
                     <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
                       <div className="flex gap-2 justify-start sm:justify-center">
                         <button
+                          onClick={() => openQrModal(user)}
+                          className="text-purple-600 hover:text-purple-800 transition-colors hover:scale-110 duration-200"
+                          title="View QR Code"
+                        >
+                          <QrCode className="w-6 h-6" />
+                        </button>
+                        <button
                           onClick={() => openEditModal(user)}
                           className="text-blue-600 hover:text-blue-800 transition-colors hover:scale-110 duration-200"
+                          title="Edit User"
                         >
                           <Edit2 className="w-6 h-6" />
                         </button>
                         <button
                           onClick={() => openDeleteModal(user)}
                           className="text-red-600 hover:text-red-800 transition-colors hover:scale-110 duration-200"
+                          title="Delete User"
                         >
                           <Trash2 className="w-6 h-6" />
                         </button>
@@ -425,12 +442,21 @@ export default function LibraryUserTable() {
       />
 
       {selectedUser && (
-        <DeleteConfirmationModal
-          isOpen={showDeleteModal}
-          user={selectedUser}
-          onConfirm={handleDeleteUser}
-          onCancel={closeModals}
-        />
+        <>
+          <DeleteConfirmationModal
+            isOpen={showDeleteModal}
+            user={selectedUser}
+            onConfirm={handleDeleteUser}
+            onCancel={closeModals}
+          />
+          
+          <QrCodeModal
+            isOpen={showQrModal}
+            userName={selectedUser.name}
+            userUid={selectedUser.uid || selectedUser.id || ""}
+            onClose={closeModals}
+          />
+        </>
       )}
     </div>
   );

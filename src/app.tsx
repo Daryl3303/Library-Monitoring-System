@@ -2,6 +2,7 @@ import SignIn from "./components/SignIn.tsx";
 import AdminSignIn from "./components/adminSignIn.tsx";
 import Admin from "./components/Admin.tsx";
 import UserMain from "./components/UserMain.tsx";
+import ScannerLogger from "./components/Scan.tsx";
 import ProtectedRoute from "./context/protectedRoute.tsx";
 import {
   BrowserRouter as Router,
@@ -15,7 +16,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/signIn" element={<SignIn />} />
-
+        <Route path="/scan" element={<ScannerLogger />} />
         <Route path="/admin/signIn" element={<AdminSignIn />} />
 
         <Route
