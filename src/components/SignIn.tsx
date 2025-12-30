@@ -53,7 +53,9 @@ const SignIn = () => {
 
       if (!userDoc.exists()) {
         await deleteUser(user);
-        throw new Error("This Google account is not registered. Please contact admin.");
+        throw new Error(
+          "This Google account is not registered. Please contact admin."
+        );
       }
 
       navigate("/user/*");
@@ -74,7 +76,6 @@ const SignIn = () => {
             : "scale-95 opacity-0 translate-y-8"
         }`}
       >
-  
         <div className="block md:hidden w-full bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white p-6 text-center">
           <h2 className="text-2xl sm:text-3xl italic font-medium font-serif text-white tracking-wide mb-2 leading-tight">
             Welcome!
@@ -85,7 +86,6 @@ const SignIn = () => {
           </p>
         </div>
 
-    
         <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center items-center p-6 lg:p-8 text-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white transform transition-all duration-700 ease-out">
           <div className="transform transition-all duration-500 hover:scale-105">
             <h2 className="text-3xl lg:text-4xl xl:text-5xl italic font-medium font-serif text-white tracking-wide text-center mb-4 leading-tight">
@@ -98,9 +98,7 @@ const SignIn = () => {
           </div>
         </div>
 
-
         <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center items-center bg-white transform transition-all duration-700 ease-out">
-  
           <div className="w-full flex flex-col justify-center items-center mb-4 sm:mb-6">
             <img
               src="/logo.png"
@@ -118,7 +116,6 @@ const SignIn = () => {
             </div>
           )}
 
-          
           <form
             className="w-full max-w-sm flex flex-col space-y-4 sm:space-y-5 transform transition-all duration-500"
             onSubmit={(e) => {
@@ -205,7 +202,6 @@ const SignIn = () => {
             </p>
           </div>
 
-  
           <div className="w-full max-w-sm flex flex-col space-y-4">
             <button
               className="w-full flex items-center justify-center bg-white border-2 border-blue-600 text-blue-600 rounded-full px-4 sm:px-6 py-3 sm:py-3.5 hover:bg-blue-50 hover:scale-105 transition-all duration-300 transform hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base"

@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
 import { Search, BookOpenCheck, X, Check } from "lucide-react";
-import { collection, getDocs, getDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import axios from "axios";
+import { generateBorrowConfirmationEmail } from "../../utils/emailUtils";
 
-interface Reservation {
+export interface Reservation {
   id?: string;
   uid?: string;
   referenceNumber: string;
@@ -22,13 +31,17 @@ interface Reservation {
   createdAt: string;
 }
 
+interface SendEmailPayload {
+  recipient: string;
+  subject: string;
+  html: string;
+}
 
 const Reservations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [selectedDepartment, setSelectedDepartment] =
     useState("All Departments");
-
 
   const fetchReservations = async () => {
     try {
@@ -54,12 +67,11 @@ const Reservations = () => {
     ...new Set(reservations.map((res) => res.department)),
   ];
 
- 
-
- const handleConfirm = async (reservationId: string) => {
+  const handleConfirm = async (reservationId: string) => {
     try {
-      
-      const reservationSnap = await getDoc(doc(db, "reservations", reservationId));
+      const reservationSnap = await getDoc(
+        doc(db, "reservations", reservationId)
+      );
       if (!reservationSnap.exists()) {
         throw new Error("Reservation not found");
       }
@@ -69,7 +81,9 @@ const Reservations = () => {
       const bookIsbn = reservationData.bookIsbn;
 
       const booksSnapshot = await getDocs(collection(db, "books"));
-      const bookDoc = booksSnapshot.docs.find((doc) => doc.data().isbn === bookIsbn);
+      const bookDoc = booksSnapshot.docs.find(
+        (doc) => doc.data().isbn === bookIsbn
+      );
 
       if (!bookDoc) {
         throw new Error("Book not found");
@@ -78,20 +92,24 @@ const Reservations = () => {
       const bookData = bookDoc.data();
       const newQuantity = (bookData.quantity || 0) - borrowQuantity;
 
-     
-
       await updateDoc(doc(db, "books", bookDoc.id), { quantity: newQuantity });
 
-      
       const returnDate = new Date();
       returnDate.setDate(returnDate.getDate() + 7);
 
-   
       await updateDoc(doc(db, "reservationStatus", reservationId), {
         status: "Confirmed",
       });
 
       await handleDeleteReservation(reservationId);
+
+      const htmlEmail = generateBorrowConfirmationEmail(reservationData);
+
+      await axios.post("http://127.0.0.1:5000/send-email", {
+        recipient: reservationData.email,
+        subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
+        html: htmlEmail,
+      });
 
       console.log("Reservation confirmed successfully!");
     } catch (error) {
@@ -102,25 +120,23 @@ const Reservations = () => {
 
   const handleDecline = async (reservationId: string) => {
     try {
-    await updateDoc(doc(db, "reservationStatus", reservationId), {
-      status: "Declined",
-    });
+      await updateDoc(doc(db, "reservationStatus", reservationId), {
+        status: "Declined",
+      });
       await handleDeleteReservation(reservationId);
-    }catch(error){
+    } catch (error) {
       console.error("Error updating status:", error);
     }
   };
 
   const handleDeleteReservation = async (reservationId: string) => {
-        try {
-          await deleteDoc(doc(db, "reservations", reservationId));
-          setReservations(reservations.filter((res) => res.id !== reservationId));
-        } catch (error) {
-          console.error("Error deleting book:", error);
-        }
-      }
-
-  
+    try {
+      await deleteDoc(doc(db, "reservations", reservationId));
+      setReservations(reservations.filter((res) => res.id !== reservationId));
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    }
+  };
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -130,7 +146,6 @@ const Reservations = () => {
     });
   };
 
-
   const filteredReservations = reservations.filter((res) => {
     const matchesSearch = res.referenceNumber
       .toLowerCase()
@@ -138,14 +153,13 @@ const Reservations = () => {
     const matchesDepartment =
       selectedDepartment === "All Departments" ||
       res.department === selectedDepartment;
-    
+
     return matchesSearch && matchesDepartment;
   });
 
   return (
     <div>
       <div className="w-full h-full bg-gray-50 p-5">
-
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
@@ -162,9 +176,7 @@ const Reservations = () => {
         <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -176,7 +188,6 @@ const Reservations = () => {
                   />
                 </div>
 
-        
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -192,7 +203,6 @@ const Reservations = () => {
             </div>
           </div>
 
-  
           <div className="overflow-x-auto">
             <table className="w-full text-sm sm:text-base">
               <thead className="bg-gray-50 border-b border-blue-700">
