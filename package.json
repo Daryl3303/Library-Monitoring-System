@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "emailjs-com": "^3.2.0",
     "firebase": "^12.1.0",
     "lucide-react": "^0.539.0",

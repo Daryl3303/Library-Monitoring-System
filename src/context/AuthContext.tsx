@@ -10,7 +10,9 @@ interface AuthContextType {
   isAdmin: boolean;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserIdState] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (storedUserId && adminFlag === "true") {
       // Admin logged in via Firestore (no Firebase Auth)
       setUserIdState(storedUserId);
-      setIsAdmin(true);
+      setIsAdmin(false);
       setLoading(false);
       return;
     }
@@ -50,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const setUserId = (id: string | null) => {
     setUserIdState(id);
     const adminFlag = localStorage.getItem("isAdmin");
-    
+
     if (id) {
       localStorage.setItem("userId", id);
       setIsAdmin(adminFlag === "true");
@@ -70,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("Firebase sign out error:", error);
       }
     }
-    
+
     // Clear all auth data
     setUserIdState(null);
     setIsAdmin(false);
@@ -80,8 +82,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ userId, setUserId, logout, loading, isAdmin }}>
-      {!loading ? children : (
+    <AuthContext.Provider
+      value={{ userId, setUserId, logout, loading, isAdmin }}
+    >
+      {!loading ? (
+        children
+      ) : (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-lg">Loading...</div>
         </div>
