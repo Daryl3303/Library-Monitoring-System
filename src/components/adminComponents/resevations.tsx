@@ -102,11 +102,19 @@ const Reservations = () => {
 
       const htmlEmail = generateBorrowConfirmationEmail(reservationData);
 
-      await axios.post(import.meta.env.VITE_EMAIL_API_URL, {
-        recipient: reservationData.email,
-        subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
-        html: htmlEmail,
-      });
+      await axios.post(
+        import.meta.env.VITE_EMAIL_API_URL,
+        {
+          recipient: reservationData.email,
+          subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
+          html: htmlEmail,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       console.log("Reservation confirmed successfully!");
     } catch (error) {
@@ -133,11 +141,20 @@ const Reservations = () => {
 
       const htmlEmail = generateBorrowDeclineEmail(reservationData);
 
-      await axios.post(import.meta.env.VITE_EMAIL_API_URL, {
-        recipient: reservationData.email,
-        subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
-        html: htmlEmail,
-      });
+      await axios.post(
+        import.meta.env.VITE_EMAIL_API_URL,
+        {
+          recipient: reservationData.email,
+          subject: `Book Borrowed Confirmation – Ref #${reservationData.referenceNumber}`,
+          html: htmlEmail,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       await handleDeleteReservation(reservationId);
     } catch (error) {
       console.error("Error updating status:", error);
