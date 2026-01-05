@@ -10,7 +10,7 @@ import {
   Hash,
   FileText,
 } from "lucide-react";
-import { collection, getDocs, getDoc, doc, addDoc, setDoc, query, where } from "firebase/firestore";
+import { collection, getDoc, doc, addDoc, setDoc, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import { db, auth } from "../../firebase/firebase";
 import ReserveModal from "../modals/reservationForm";
 import SuccessAnimation  from "../Success/successAnimation";
@@ -113,40 +113,49 @@ const ViewBooks: React.FC = () => {
     returnedAt: "",
   });
 
-  const fetchBooks = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "books"));
-      const booksData: Book[] = querySnapshot.docs.map((document) => {
-        const data = document.data() as Book;
-        return {
-          id: document.id,
-          title: data.title,
-          author: data.author,
-          publisher: data.publisher,
-          date: data.date,
-          isbn: data.isbn,
-          genre: data.genre,
-          quantity: data.quantity,
-          description: data.description,
-          coverPage: data.coverPage || "",
-        };
-      });
+  // Real-time listener for books with snapshot
+  useEffect(() => {
+    const q = query(collection(db, "books"));
 
-      setBooks(booksData);
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const booksData: Book[] = querySnapshot.docs.map((document) => {
+          const data = document.data() as Book;
+          return {
+            id: document.id,
+            title: data.title,
+            author: data.author,
+            publisher: data.publisher,
+            date: data.date,
+            isbn: data.isbn,
+            genre: data.genre,
+            quantity: data.quantity,
+            description: data.description,
+            coverPage: data.coverPage || "",
+          };
+        });
 
-      const uniqueGenres = Array.from(
-        new Set(
-          booksData.map((b) => b.genre?.trim().toLowerCase()).filter(Boolean)
+        setBooks(booksData);
+
+        const uniqueGenres = Array.from(
+          new Set(
+            booksData.map((b) => b.genre?.trim().toLowerCase()).filter(Boolean)
+          )
         )
-      )
-        .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
-        .sort();
+          .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+          .sort();
 
-      setGenres(["All Book Genres", ...uniqueGenres]);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
+        setGenres(["All Book Genres", ...uniqueGenres]);
+      },
+      (error) => {
+        console.error("Error fetching books:", error);
+      }
+    );
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
+  }, []);
 
   const fetchCurrentUser = async () => {
     try {
@@ -196,7 +205,6 @@ const ViewBooks: React.FC = () => {
 
   useEffect(() => {
     fetchCurrentUser();
-    fetchBooks();
   }, []);
 
   useEffect(() => {

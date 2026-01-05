@@ -48,8 +48,8 @@ const ReserveModal: React.FC<ReserveModalProps> = ({
     "Bachelor of Science in Information Technology",
     "Bachelor of Science in Business Administration",
     "Bachelor of Science in Hospital Management",
-    "Bachelor of Science in Elementary Education",
-    "Bachelor of Science in Secondary Education",
+    "Bachelor in Elementary Education",
+    "Bachelor in Secondary Education",
   ];
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
