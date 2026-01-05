@@ -6,10 +6,11 @@ import DeleteBookModal from "../modals/DeleteBook";
 import {
   collection,
   addDoc,
-  getDocs,
   updateDoc,
   deleteDoc,
   doc,
+  onSnapshot,
+  query,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
@@ -43,7 +44,7 @@ export default function LibraryUserTable() {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string>("All Book Genres");
-const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
+  const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,62 +73,58 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
     return matchesSearch && matchesGenres;
   });
 
-  const fetchBooks = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "books"));
-      const booksData: Book[] = querySnapshot.docs.map((document) => ({
-        id: document.id,
-        ...(document.data() as Book),
-      }));
-      setBooks(booksData);
+  // Real-time listener with snapshot
+  useEffect(() => {
+    const q = query(collection(db, "books"));
 
-      const uniqueGenres = Array.from(
-         new Set(
-        booksData
-          .map((book) => book.genre?.trim().toLowerCase())
-          .filter(Boolean))).map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const booksData: Book[] = querySnapshot.docs.map((document) => ({
+          id: document.id,
+          ...(document.data() as Book),
+        }));
+        setBooks(booksData);
+
+        const uniqueGenres = Array.from(
+          new Set(
+            booksData
+              .map((book) => book.genre?.trim().toLowerCase())
+              .filter(Boolean)
+          )
+        )
+          .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
           .sort();
 
-      setGenres(["All Book Genres", ...uniqueGenres]);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
+        setGenres(["All Book Genres", ...uniqueGenres]);
+      },
+      (error) => {
+        console.error("Error fetching books:", error);
+      }
+    );
 
-  useEffect(() => {
-    fetchBooks();
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
-
-
-
 
   const handleAddBook = async () => {
     try {
       const newBook = { ...formData };
-
-      const docRef = await addDoc(collection(db, "books"), newBook);
-      setBooks([...books, { id: docRef.id, ...newBook }]);
+      await addDoc(collection(db, "books"), newBook);
+      // No need to manually update state - snapshot listener will handle it
       setShowAddModal(false);
       resetForm();
     } catch (error) {
       console.error("Error adding book:", error);
-      console.log(books)
     }
   };
 
   const handleEditBook = async () => {
     if (selectedBook) {
       try {
-        const updatedData = { ...formData };
-
         const bookRef = doc(db, "books", selectedBook.id as string);
         await updateDoc(bookRef, { ...formData });
-        setBooks(
-          books.map((book) =>
-            book.id === selectedBook.id ? { ...book, ...updatedData } : book
-          )
-        );
-
+        // No need to manually update state - snapshot listener will handle it
         setShowEditModal(false);
         resetForm();
       } catch (error) {  
@@ -140,7 +137,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
     if (selectedBook) {
       try {
         await deleteDoc(doc(db, "books", selectedBook.id as string));
-        setBooks(books.filter((book) => book.id !== selectedBook.id));
+        // No need to manually update state - snapshot listener will handle it
         setShowDeleteModal(false);
         setSelectedBook(null);
       } catch (error) {
@@ -197,7 +194,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
     resetForm();
   };
 
-   const formatDate = (dateString: string): string => {
+  const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -223,7 +220,7 @@ const [genres, setGenres] = useState<string[]>(["All Book Genres"]);
         </div>
 
       
-        <div className="bg-white rounded-[20px] border border-blue-800">
+        <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         

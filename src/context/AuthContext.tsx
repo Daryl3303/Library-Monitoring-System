@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (storedUserId && adminFlag === "true") {
       // Admin logged in via Firestore (no Firebase Auth)
       setUserIdState(storedUserId);
-      setIsAdmin(false);
+      setIsAdmin(true);
       setLoading(false);
       return;
     }

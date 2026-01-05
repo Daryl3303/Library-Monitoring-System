@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  deleteUser,
-} from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 
@@ -36,31 +28,6 @@ const SignIn = () => {
     } catch (err: any) {
       console.error("Sign-in error:", err.message);
       setError("Invalid credentials. Please try again.");
-    } finally {
-      setAuthing(false);
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    setAuthing(true);
-    setError("");
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-
-      const user = result.user;
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-
-      if (!userDoc.exists()) {
-        await deleteUser(user);
-        throw new Error(
-          "This Google account is not registered. Please contact admin."
-        );
-      }
-    } catch (err: any) {
-      console.error("Google sign-in error:", err.message);
-      setError(err.message || "Google sign-in failed.");
     } finally {
       setAuthing(false);
     }
@@ -169,7 +136,6 @@ const SignIn = () => {
               type="submit"
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 sm:py-3.5 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base"
               disabled={authing}
-              onClick={signInWithEmail}
             >
               {authing ? (
                 <span className="flex items-center justify-center">
@@ -200,52 +166,6 @@ const SignIn = () => {
               )}
             </button>
           </form>
-
-          <div className="w-full flex max-w-sm items-center justify-center relative py-4 sm:py-6 mt-3 sm:mt-4 mb-3 sm:mb-4">
-            <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
-            <p className="text-xs sm:text-sm absolute text-blue-600 bg-white px-3 sm:px-4 font-semibold font-inter tracking-wide">
-              OR
-            </p>
-          </div>
-
-          <div className="w-full max-w-sm flex flex-col space-y-4">
-            <button
-              className="w-full flex items-center justify-center bg-white border-2 border-blue-600 text-blue-600 rounded-full px-4 sm:px-6 py-3 sm:py-3.5 hover:bg-blue-50 hover:scale-105 transition-all duration-300 transform hover:shadow-lg font-semibold font-inter tracking-wide text-sm sm:text-base"
-              onClick={signInWithGoogle}
-              disabled={authing}
-            >
-              {authing ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-4 w-4 sm:h-5 sm:w-5 text-blue-600"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Logging in...
-                </span>
-              ) : (
-                <>
-                  <span>Continue with Google</span>
-                  <FcGoogle className="ml-2 text-lg sm:text-xl" />
-                </>
-              )}
-            </button>
-          </div>
         </div>
       </div>
     </div>
