@@ -2,12 +2,15 @@ import { createContext, useState, useEffect, ReactNode } from "react";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 
+type AuthType = "admin" | "user" | null;
+
 interface AuthContextType {
   userId: string | null;
-  setUserId: (id: string | null) => void;
+  adminId: string | null;
+  authType: AuthType;
+  loginAdmin: (adminId: string) => void;
   logout: () => void;
   loading: boolean;
-  isAdmin: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -15,33 +18,31 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [userId, setUserIdState] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [adminId, setAdminId] = useState<string | null>(null);
+  const [authType, setAuthType] = useState<AuthType>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // First check if there's an admin login in localStorage
-    const storedUserId = localStorage.getItem("userId");
-    const adminFlag = localStorage.getItem("isAdmin");
+    // 🔴 PRIORITY 1: ADMIN SESSION (NO FIREBASE)
+    const storedAdminId = localStorage.getItem("adminId");
+    const adminLoggedIn = localStorage.getItem("adminLoggedIn");
 
-    if (storedUserId && adminFlag === "true") {
-      // Admin logged in via Firestore (no Firebase Auth)
-      setUserIdState(storedUserId);
-      setIsAdmin(true);
+    if (storedAdminId && adminLoggedIn === "true") {
+      setAdminId(storedAdminId);
+      setAuthType("admin");
       setLoading(false);
       return;
     }
 
-    // Listen for Firebase Auth changes (for teachers & students)
+    // 🔵 PRIORITY 2: FIREBASE USER SESSION
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        // Teacher or Student logged in via Firebase Auth
-        setUserIdState(user.uid);
-        setIsAdmin(false);
+        setUserId(user.uid);
+        setAuthType("user");
       } else {
-        // No user logged in
-        setUserIdState(null);
-        setIsAdmin(false);
+        setUserId(null);
+        setAuthType(null);
       }
       setLoading(false);
     });
@@ -49,49 +50,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const setUserId = (id: string | null) => {
-    setUserIdState(id);
-    const adminFlag = localStorage.getItem("isAdmin");
+  // 🔐 ADMIN LOGIN (manual)
+  const loginAdmin = (id: string) => {
+    localStorage.setItem("adminId", id);
+    localStorage.setItem("adminLoggedIn", "true");
 
-    if (id) {
-      localStorage.setItem("userId", id);
-      setIsAdmin(adminFlag === "true");
-    } else {
-      localStorage.removeItem("userId");
-      localStorage.removeItem("isAdmin");
-      setIsAdmin(false);
-    }
+    setAdminId(id);
+    setAuthType("admin");
   };
 
+  // 🚪 LOGOUT (both types)
   const logout = async () => {
-    // If user is logged in via Firebase Auth (teacher/student), sign out
-    if (!isAdmin && auth.currentUser) {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        console.error("Firebase sign out error:", error);
-      }
+    if (authType === "user" && auth.currentUser) {
+      await signOut(auth);
     }
 
-    // Clear all auth data
-    setUserIdState(null);
-    setIsAdmin(false);
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("adminId");
+    localStorage.removeItem("adminLoggedIn");
+
+    setUserId(null);
+    setAdminId(null);
+    setAuthType(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ userId, setUserId, logout, loading, isAdmin }}
+      value={{
+        userId,
+        adminId,
+        authType,
+        loginAdmin,
+        logout,
+        loading,
+      }}
     >
-      {!loading ? (
-        children
-      ) : (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-lg">Loading...</div>
-        </div>
-      )}
+      {!loading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 };

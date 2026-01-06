@@ -7,7 +7,7 @@ import { useAuth } from "../context/useAuth";
 
 const AdminSignIn = () => {
   const navigate = useNavigate();
-  const { setUserId } = useAuth(); // Get setUserId from context
+  const { loginAdmin } = useAuth(); // ✅ CORRECT
 
   const [authing, setAuthing] = useState(false);
   const [username, setUsername] = useState("");
@@ -23,58 +23,41 @@ const AdminSignIn = () => {
   const signInWithCredentials = async () => {
     setAuthing(true);
     setError("");
-    
-    console.log("Attempting to sign in with username:", username);
-    
+
     try {
       const adminsRef = collection(db, "admin");
       const q = query(adminsRef, where("username", "==", username));
       const querySnapshot = await getDocs(q);
 
-      console.log("Query snapshot empty?", querySnapshot.empty);
-
       if (querySnapshot.empty) {
-        setError("Invalid username or password. Please try again.");
-        setAuthing(false);
+        setError("Invalid username or password.");
         return;
       }
 
       const adminDoc = querySnapshot.docs[0];
       const adminData = adminDoc.data();
 
-      console.log("Admin data found:", { username: adminData.username });
-
       if (adminData.password !== password) {
-        console.log("Password mismatch");
-        setError("Invalid username or password. Please try again.");
-        setAuthing(false);
+        setError("Invalid username or password.");
         return;
       }
 
-      console.log("Login successful, setting localStorage and context");
+      // ✅ LOGIN ADMIN (NO FIREBASE, NO userId)
+      loginAdmin(adminDoc.id);
 
-      // Store admin session in localStorage FIRST
-      localStorage.setItem("userId", adminDoc.id);
-      localStorage.setItem("username", adminData.username);
-      localStorage.setItem("isAdmin", "true");
+      // ✅ Navigate to admin dashboard
+      navigate("/admin", { replace: true });
 
-      // Update AuthContext
-      setUserId(adminDoc.id);
-
-      // Add a small delay to ensure context updates
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      console.log("Navigating to /admin");
-      
-      // Navigate to admin page
-      navigate("/admin/*", { replace: true });
     } catch (err: any) {
-      console.error("Sign-in error:", err);
-      setError(`An error occurred: ${err.message}`);
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setAuthing(false);
     }
   };
+
+  // UI stays exactly the same ↓↓↓
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">

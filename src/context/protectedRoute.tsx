@@ -6,33 +6,32 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { userId, loading, isAdmin } = useAuth();
+  const { authType, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!userId) {
-    // Not logged in - redirect to appropriate sign-in page
-    if (location.pathname.startsWith('/admin')) {
+  // 🚫 Not logged in
+  if (!authType) {
+    if (location.pathname.startsWith("/admin")) {
       return <Navigate to="/admin/signIn" replace />;
     }
     return <Navigate to="/signIn" replace />;
   }
 
-  // Check if trying to access admin routes
-  if (location.pathname.startsWith('/admin') && !isAdmin) {
-    // Regular user trying to access admin area - redirect to user area
+  // 🚫 User trying to access admin
+  if (location.pathname.startsWith("/admin") && authType !== "admin") {
     return <Navigate to="/user" replace />;
   }
 
-  // Check if admin trying to access user routes
-  if (location.pathname.startsWith('/user') && isAdmin) {
-    // Admin trying to access user area - redirect to admin area
+  // 🚫 Admin trying to access user
+  if (location.pathname.startsWith("/user") && authType !== "user") {
     return <Navigate to="/admin" replace />;
   }
 
+  // ✅ Allowed
   return children;
 };
 

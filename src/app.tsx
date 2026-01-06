@@ -19,11 +19,7 @@ const App = () => {
         <Route path="/scan" element={<ScannerLogger />} />
         <Route path="/admin/signIn" element={<AdminSignIn />} />
 
-        <Route
-          path="/admin"
-          element={<Navigate to="/admin/signIn" replace />}
-        />
-
+   
         <Route
           path="/admin/*"
           element={
@@ -33,8 +29,7 @@ const App = () => {
           }
         />
 
-        <Route path="/user" element={<Navigate to="/signIn" replace />} />
-
+  
         <Route
           path="/user/*"
           element={

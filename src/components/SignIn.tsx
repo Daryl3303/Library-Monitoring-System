@@ -7,12 +7,12 @@ import { useAuth } from "../context/useAuth";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { authType, loading } = useAuth();
 
   const [authing, setAuthing] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { userId, loading, isAdmin } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -20,11 +20,14 @@ const SignIn = () => {
     setIsLoaded(true);
   }, []);
 
+  // 🔐 USER LOGIN (Firebase Auth ONLY)
   const signInWithEmail = async () => {
     setAuthing(true);
     setError("");
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // ✅ AuthContext will update via onAuthStateChanged
     } catch (err: any) {
       console.error("Sign-in error:", err.message);
       setError("Invalid credentials. Please try again.");
@@ -33,12 +36,12 @@ const SignIn = () => {
     }
   };
 
+  // 🚦 REDIRECT ONLY WHEN AUTHENTICATED AS USER
   useEffect(() => {
-    console.log("Auth state changed:", { userId, isAdmin, loading });
-    if (userId !== null && !loading) {
-      navigate("/user/*");
+    if (!loading && authType === "user") {
+      navigate("/user", { replace: true });
     }
-  }, [userId, loading, isAdmin, navigate]);
+  }, [authType, loading, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 p-3 sm:p-4 font-inter">
