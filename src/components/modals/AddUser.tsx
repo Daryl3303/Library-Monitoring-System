@@ -1,3 +1,4 @@
+// AddUser.tsx (UserFormModal)
 import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -13,23 +14,21 @@ interface FormData {
   role: "Student" | "Teacher";
 }
 
+interface Department {
+  id?: string;
+  name: string;
+}
+
 interface UserFormModalProps {
   isOpen: boolean;
   isEdit: boolean;
   formData: FormData;
   error: string;
+  departments: Department[];
   setFormData: (data: FormData) => void;
   onSubmit: () => void;
   onClose: () => void;
 }
-
-const departments = [
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration",
-  "Bachelor of Science in Hospital Management",
-  "Bachelor in Elementary Education",
-  "Bachelor in Secondary Education",
-];
 
 const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
@@ -38,6 +37,7 @@ function UserFormModal({
   isEdit,
   error,
   formData,
+  departments,
   setFormData,
   onSubmit,
   onClose,
@@ -240,11 +240,14 @@ function UserFormModal({
                   <option value="" disabled hidden>
                     Select Department
                   </option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
+                  {departments
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((dept) => (
+                      <option key={dept.id} value={dept.name}>
+                        {dept.name}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -280,9 +283,8 @@ function UserFormModal({
                       setFormData({ ...formData, year: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  > 
-                  
+                    required
+                  >
                     <option disabled value="">
                       Select Year
                     </option>

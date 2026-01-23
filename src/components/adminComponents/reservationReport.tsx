@@ -27,16 +27,8 @@ interface ReservationCount {
   total: number;
 }
 
-const departments = [
-  "All Departments",
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration",
-  "Bachelor of Science in Hospital Management",
-  "Bachelor in Elementary Education",
-  "Bachelor in Secondary Education",
-];
-
 const ReservationReport = () => {
+  const [departments, setDepartments] = useState<string[]>(["All Departments"]);
   const [reservations, setReservations] = useState<ReservationData[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [reservationCounts, setReservationCounts] = useState<ReservationCount[]>([]);
@@ -73,6 +65,16 @@ const ReservationReport = () => {
     end.setHours(23, 59, 59, 999);
     
     return date >= start && date <= end;
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "departments"));
+      const departmentsData = querySnapshot.docs.map((document) => document.data().name);
+      setDepartments(["All Departments", ...departmentsData]);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
   };
 
   const fetchReservations = async () => {
@@ -242,6 +244,7 @@ const ReservationReport = () => {
   const overallTotal = reservationCounts.reduce((sum, count) => sum + count.total, 0);
 
   useEffect(() => {
+    fetchDepartments();
     fetchReservations();
   }, []);
 

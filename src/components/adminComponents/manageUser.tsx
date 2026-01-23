@@ -1,9 +1,10 @@
 // LibraryUserTable.tsx
 import { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, User, QrCode } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, User, QrCode, Building2 } from "lucide-react";
 import UserFormModal from "../modals/AddUser";
 import DeleteConfirmationModal from "../modals/DeleteUser";
 import QrCodeModal from "../modals/qrcode";
+import AddDepartmentModal from "../modals/addDepartment";
 
 import {
   collection,
@@ -12,24 +13,27 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  addDoc,
 } from "firebase/firestore";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { sendNewUserEmail } from "../../utils/emailQr";
 import { db } from "../../firebase/firebase";
 
-interface User {
+
+export interface User {
   id?: string;
-  uid?: string;
+  uid: string;
   name: string;
   email: string;
   address: string;
   number: string;
   department: string;
   year: string;
-  role: "Student" | "Teacher" ;
+  role: "Student" | "Teacher";
 }
 
 interface FormData {
@@ -43,27 +47,26 @@ interface FormData {
   role: "Student" | "Teacher";
 }
 
-const departments = [
-  "All Departments",
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Business Administration",
-  "Bachelor of Science in Hospital Management",
-  "Bachelor in Elementary Education",
-  "Bachelor in Secondary Education",
-];
+interface Department {
+  id?: string;
+  name: string;
+}
 
 export default function LibraryUserTable() {
   const auth = getAuth();
   const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showAddDepartmentModal, setShowAddDepartmentModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [departmentName, setDepartmentName] = useState("");
+  const [departmentError, setDepartmentError] = useState("");
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -74,7 +77,6 @@ export default function LibraryUserTable() {
     year: "",
     role: "Student",
   });
-
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name
@@ -99,23 +101,67 @@ export default function LibraryUserTable() {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "departments"));
+      const departmentsData: Department[] = querySnapshot.docs.map((document) => ({
+        id: document.id,
+        name: document.data().name,
+      }));
+      setDepartments(departmentsData);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchDepartments();
   }, []);
 
-  const handleAddUser = async () => {
+  const handleAddDepartment = async () => {
+    if (!departmentName.trim()) {
+      setDepartmentError("Department name is required");
+      return;
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, "departments"), {
+        name: departmentName.trim(),
+        createdAt: new Date(),
+      });
+
+      const newDepartment: Department = {
+        id: docRef.id,
+        name: departmentName.trim(),
+      };
+
+      setDepartments([...departments, newDepartment]);
+      setShowAddDepartmentModal(false);
+      setDepartmentName("");
+      setDepartmentError("");
+    } catch (err: any) {
+      console.error("Error adding department:", err.message);
+      setDepartmentError(err.message);
+    }
+  };
+
+ const handleAddUser = async () => {
   try {
+    // Step 1: Create Firebase Authentication account
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       formData.email,
       formData.password
     );
-
     const user = userCredential.user;
+
+    // Step 2: Update display name
     if (formData.name) {
       await updateProfile(user, { displayName: formData.name });
     }
 
+    // Step 3: Add user info to Firestore
     await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       name: formData.name,
@@ -128,7 +174,7 @@ export default function LibraryUserTable() {
       createdAt: new Date(),
     });
 
-   
+    // Step 4: Add to UI list
     const newUser: User = {
       id: user.uid,
       uid: user.uid,
@@ -142,48 +188,53 @@ export default function LibraryUserTable() {
     };
 
     setUsers([...users, newUser]);
-
- 
     setShowAddModal(false);
     resetForm();
+
+   
+  await sendNewUserEmail(newUser, formData.password);
+
+    
+  
+
+    console.log("✅ User added and email sent successfully!");
   } catch (err: any) {
     console.error("Signup error:", err.message);
-      setError(err.message);
+    setError(err.message);
+    alert("Error adding user. Please try again.");
   }
 };
 
   const handleEditUser = async () => {
-  if (selectedUser) {
-    try {
-      const userRef = doc(db, "users", selectedUser.id as string);
+    if (selectedUser) {
+      try {
+        const userRef = doc(db, "users", selectedUser.id as string);
 
-      const updateData = {
-        name: formData.name,
-        number: formData.number,
-        address: formData.address,
-        department: formData.department,
-        year: formData.year,
-        role: formData.role,
-        updatedAt: new Date(),
-      };
-      await updateDoc(userRef, updateData);
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id
-            ? { ...user, ...updateData }
-            : user
-        )
-      );
+        const updateData = {
+          name: formData.name,
+          number: formData.number,
+          address: formData.address,
+          department: formData.department,
+          year: formData.year,
+          role: formData.role,
+          updatedAt: new Date(),
+        };
+        await updateDoc(userRef, updateData);
+        setUsers(
+          users.map((user) =>
+            user.id === selectedUser.id ? { ...user, ...updateData } : user
+          )
+        );
 
-      setShowEditModal(false);
-      resetForm();
+        setShowEditModal(false);
+        resetForm();
 
-      console.log("User updated successfully");
-    } catch (error: any) {
-      console.error("Error updating user:", error);
+        console.log("User updated successfully");
+      } catch (error: any) {
+        console.error("Error updating user:", error);
+      }
     }
-  }
-};
+  };
 
   const handleDeleteUser = async () => {
     if (selectedUser) {
@@ -244,19 +295,27 @@ export default function LibraryUserTable() {
     setShowQrModal(true);
   };
 
+  const openAddDepartmentModal = () => {
+    setDepartmentName("");
+    setDepartmentError("");
+    setShowAddDepartmentModal(true);
+  };
+
   const closeModals = () => {
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
     setShowQrModal(false);
+    setShowAddDepartmentModal(false);
     resetForm();
     setError("");
+    setDepartmentName("");
+    setDepartmentError("");
   };
 
   return (
     <div>
       <div className="w-full h-full bg-gray-50 p-5">
-     
         <div className="mb-8 sm:mb-10 border-b border-gray-200 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
@@ -269,7 +328,6 @@ export default function LibraryUserTable() {
             </div>
           </div>
         </div>
-
 
         <div className="bg-white rounded-[20px] border border-blue-800 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-blue-700">
@@ -291,25 +349,37 @@ export default function LibraryUserTable() {
                   onChange={(e) => setSelectedDepartment(e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                 >
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
+                  <option value="All Departments">All Departments</option>
+                  {departments
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((dept) => (
+                      <option key={dept.id} value={dept.name}>
+                        {dept.name}
+                      </option>
+                    ))}
                 </select>
               </div>
 
-              <button
-                onClick={openAddModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md flex items-center justify-center hover:scale-105 duration-300 gap-2 transition-colors w-full sm:w-auto"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="text-sm sm:text-base">Add User</span>
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={openAddDepartmentModal}
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-md flex items-center justify-center hover:scale-105 duration-300 gap-2 transition-colors w-full sm:w-auto"
+                >
+                  <Building2 className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">Add Department</span>
+                </button>
+                <button
+                  onClick={openAddModal}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md flex items-center justify-center hover:scale-105 duration-300 gap-2 transition-colors w-full sm:w-auto"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-sm sm:text-base">Add User</span>
+                </button>
+              </div>
             </div>
           </div>
 
- 
           <div className="overflow-x-auto">
             <table className="w-full text-sm sm:text-base">
               <thead className="bg-gray-50 border-b border-blue-700">
@@ -334,80 +404,81 @@ export default function LibraryUserTable() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-blue-200">
-                {filteredUsers.
-                slice().
-                sort((a,b) => a.name.localeCompare(b.name)).map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
-                      {user.name}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {user.email}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {user.address}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {user.number}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      {user.department}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          user.year === "1st Year"
-                            ? "bg-red-300 text-red-900"
-                            : user.year === "2nd Year"
-                            ? "bg-blue-300 text-blue-900"
-                            : user.year === "3rd Year"
-                            ? "bg-green-300 text-green-900"
-                            : user.year === "4th Year"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-yellow-300 text-yellow-900"
-                        }`}
-                      >
-                        {user.year === "" ? "N/A" : user.year}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-center">
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                         user.role === "Teacher"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
-                      <div className="flex gap-2 justify-start sm:justify-center">
-                        <button
-                          onClick={() => openQrModal(user)}
-                          className="text-purple-600 hover:text-purple-800 transition-colors hover:scale-110 duration-200"
-                          title="View QR Code"
+                {filteredUsers
+                  .slice()
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-900 text-center">
+                        {user.name}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        {user.email}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        {user.address}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        {user.number}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        {user.department}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            user.year === "1st Year"
+                              ? "bg-red-300 text-red-900"
+                              : user.year === "2nd Year"
+                              ? "bg-blue-300 text-blue-900"
+                              : user.year === "3rd Year"
+                              ? "bg-green-300 text-green-900"
+                              : user.year === "4th Year"
+                              ? "bg-gray-300 text-gray-900"
+                              : "bg-yellow-300 text-yellow-900"
+                          }`}
                         >
-                          <QrCode className="w-6 h-6" />
-                        </button>
-                        <button
-                          onClick={() => openEditModal(user)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors hover:scale-110 duration-200"
-                          title="Edit User"
+                          {user.year === "" ? "N/A" : user.year}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-center">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            user.role === "Teacher"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
                         >
-                          <Edit2 className="w-6 h-6" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(user)}
-                          className="text-red-600 hover:text-red-800 transition-colors hover:scale-110 duration-200"
-                          title="Delete User"
-                        >
-                          <Trash2 className="w-6 h-6" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-gray-500 text-center">
+                        <div className="flex gap-2 justify-start sm:justify-center">
+                          <button
+                            onClick={() => openQrModal(user)}
+                            className="text-purple-600 hover:text-purple-800 transition-colors hover:scale-110 duration-200"
+                            title="View QR Code"
+                          >
+                            <QrCode className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(user)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors hover:scale-110 duration-200"
+                            title="Edit User"
+                          >
+                            <Edit2 className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(user)}
+                            className="text-red-600 hover:text-red-800 transition-colors hover:scale-110 duration-200"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
 
@@ -420,7 +491,6 @@ export default function LibraryUserTable() {
         </div>
       </div>
 
-   
       <UserFormModal
         isOpen={showAddModal}
         isEdit={false}
@@ -429,6 +499,7 @@ export default function LibraryUserTable() {
         setFormData={setFormData}
         onSubmit={handleAddUser}
         onClose={closeModals}
+        departments={departments}
       />
 
       <UserFormModal
@@ -439,6 +510,7 @@ export default function LibraryUserTable() {
         setFormData={setFormData}
         onSubmit={handleEditUser}
         onClose={closeModals}
+        departments={departments}
       />
 
       {selectedUser && (
@@ -449,7 +521,7 @@ export default function LibraryUserTable() {
             onConfirm={handleDeleteUser}
             onCancel={closeModals}
           />
-          
+
           <QrCodeModal
             isOpen={showQrModal}
             userName={selectedUser.name}
@@ -458,6 +530,15 @@ export default function LibraryUserTable() {
           />
         </>
       )}
+
+      <AddDepartmentModal
+        isOpen={showAddDepartmentModal}
+        departmentName={departmentName}
+        setDepartmentName={setDepartmentName}
+        error={departmentError}
+        onSubmit={handleAddDepartment}
+        onClose={closeModals}
+      />
     </div>
   );
 }

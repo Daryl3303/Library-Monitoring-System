@@ -1,6 +1,7 @@
 import { ReservationStatus } from "../components/adminComponents/manageReservation";
 import { Reservation } from "../components/adminComponents/resevations";
 
+
 export function generateBorrowConfirmationEmail(
   reservation: Reservation
 ): string {
@@ -49,10 +50,6 @@ export function generateBorrowConfirmationEmail(
 
       <br />
 
-      <p>
-        <strong>Library Administration</strong><br />
-        ${reservation.department}
-      </p>
     </div>
   `;
 }
@@ -104,10 +101,6 @@ export function generateBorrowDeclineEmail(reservation: Reservation): string {
 
       <br />
 
-      <p>
-        <strong>Library Administration</strong><br />
-        ${reservation.department}
-      </p>
     </div>
   `;
 }
@@ -163,10 +156,8 @@ export function generateOverdueEmail(reservation: ReservationStatus): string {
 
       <br />
 
-      <p>
-        <strong>Library Administration</strong><br />
-        ${reservation.department}
-      </p>
     </div>
   `;
 }
+
+
